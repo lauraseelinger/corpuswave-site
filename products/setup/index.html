@@ -1336,7 +1336,7 @@ $("reserveBtn").addEventListener("click", () => {
   const btn = $("reserveBtn"), waitlist = spotsLeft === 0;
   const who = { name: last.name, email: last.email, company: last.company, website: last.website, source: last.source };
   if (SUBMIT_URL) { try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "founding_reservation", status: waitlist ? "waitlist" : "checkout started", ...who }) }); } catch {} }
-  if (waitlist) { btn.textContent = "On the waitlist ✓"; btn.disabled = true; btn.dataset.done = "1"; $("offerNote").textContent = "You're first in line if a spot opens. I'll email you."; return; }
+  if (waitlist) { btn.textContent = "On the waitlist ✓"; btn.disabled = true; btn.dataset.done = "1"; $("offerNote").textContent = "You're first in line if a spot opens, and the email comes to you before anyone else hears about it."; return; }
   if (!CHECKOUT_URL) { $("offerNote").textContent = "Checkout isn't connected yet. This is a preview."; return; }
   const u = new URL(CHECKOUT_URL); u.searchParams.set("prefilled_email", last.email);
   window.open(u.toString(), "_blank", "noopener");

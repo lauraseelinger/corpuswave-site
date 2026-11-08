@@ -790,16 +790,16 @@
       <p>Your prompt list, prompt audit and AI visibility baseline, step by step, with guidance on what the results mean for your strategy.</p>
       <p>An audit is only accurate when the prompts match what customers actually ask. The beta builds yours from the research you just started.</p>
       <div class="offer-facts">
-        <p><b>Founding members get 50% off.</b> The beta opens by the end of November, so your AI visibility strategy is in place before the new year.</p>
+        <p><b>Founding members pay half price.</b> The beta opens by the end of November, so your AI visibility strategy is in place before the new year.</p>
       </div>
       <div class="offer-actions">
         <div class="pricecol">
-          <span class="pricepill" id="pricePill" aria-label="Price"><s>$499</s> <b>$249.50</b></span>
+          <span class="pricepill" id="pricePill" aria-label="Price"><s>$499</s> <b>$250</b></span>
           <span class="pricecap" id="offerSpots">Beta testing limited to 10 members</span>
         </div>
-        <button class="pill" type="button" id="reserveBtn">Reserve my spot · $0 today</button>
+        <button class="pill" type="button" id="reserveBtn">Reserve my spot</button>
       </div>
-      <p class="fine" id="offerNote">Reserving is free and holds your spot and your founding price.</p>
+      <p class="fine" id="offerNote">You're charged $250 when you reserve. Change your mind before the beta opens and I'll refund you in full. Just email laura@lsxpartners.com.</p>
     </section>
     <p class="fine">These results use starting rules of thumb from a ten-minute check. The full plan goes deeper.</p>
   </div>
@@ -811,8 +811,9 @@
 "use strict";
 /* ---- Settings ---- */
 const FULL_PRICE = "$499";        // Guided Audit list price; empty = "Pricing at launch"
-const FOUNDING_PRICE = "$249.50"; // half price for founding beta members
+const FOUNDING_PRICE = "$250";    // founding beta price, charged at reservation
 const BETA_SPOTS = "10";            // e.g. "25 brands"; empty = "Beta spots are limited."
+const CHECKOUT_URL = "";          // Stripe Payment Link for the founding price; empty = preview
 const SUBMIT_URL = "";            // Apps Script web app URL; empty = preview mode (nothing is sent)
 const BETA_OPEN_DATE = "";        // the date lives in the founding beta section only
 const PARSE_SKILL = "the Corpuswave capture skill";  // placeholder name until the skill kit ships
@@ -1320,30 +1321,26 @@ function sendSetup(d) {
   try { kit_b64 = XLSX.write(buildKit(d), { type: "base64", bookType: "xlsx" }); } catch {}
   try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "setup", ...d, findings, kit_b64, kit_name: kitName(d) }) }); } catch {}
 }
+const REFUND_NOTE = `You're charged ${FOUNDING_PRICE} when you reserve. Change your mind before the beta opens and I'll refund you in full. Just email laura@lsxpartners.com.`;
 function showSpots(left) {
   if (left == null) return;
   const full = left <= 0;
   $("offerSpots").textContent = full ? `All ${BETA_SPOTS} beta spots are taken` : `Beta testing limited to ${BETA_SPOTS} members · ${left} left`;
-  if (full && !$("reserveBtn").disabled) { $("reserveBtn").textContent = "Join the waitlist · $0"; $("offerNote").textContent = "The waitlist is free. If a spot opens, it's yours."; }
+  if (full && !$("reserveBtn").dataset.done) { $("reserveBtn").textContent = "Join the waitlist"; $("offerNote").textContent = "The waitlist is free. If a spot opens, I'll email you before anyone else."; }
 }
 let spotsLeft = null;
 if (SUBMIT_URL) fetch(SUBMIT_URL + "?action=spots").then(r => r.json()).then(j => { spotsLeft = j.left; showSpots(spotsLeft); }).catch(() => {});
 $("kitBtn").addEventListener("click", () => { if (last) downloadKit(last); });
-$("reserveBtn").addEventListener("click", async () => {
+$("reserveBtn").addEventListener("click", () => {
   if (!last) return;
-  const btn = $("reserveBtn"); btn.disabled = true;
-  let status = "reserved", left = null;
-  if (SUBMIT_URL) {
-    btn.textContent = "Reserving…";
-    try {
-      const r = await fetch(SUBMIT_URL, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "founding_reservation", name: last.name, email: last.email, company: last.company, website: last.website, source: last.source }) });
-      const j = await r.json(); status = j.status || "reserved"; left = j.left;
-    } catch { btn.disabled = false; btn.textContent = "Reserve my spot · $0 today"; $("offerNote").textContent = "That didn't go through. Try again, or email laura@lsxpartners.com and I'll hold your spot."; return; }
-  }
-  if (left != null) spotsLeft = left;
-  showSpots(spotsLeft);
-  if (status === "waitlist") { btn.textContent = "On the waitlist ✓"; $("offerNote").textContent = "All the founding spots are taken, so you're first on the waitlist. If a spot opens, I'll email you."; }
-  else { btn.textContent = "Spot reserved ✓"; $("offerNote").textContent = "You're on the founding list. I'll email you when the beta opens, with your 50% off held."; }
+  const btn = $("reserveBtn"), waitlist = spotsLeft === 0;
+  const who = { name: last.name, email: last.email, company: last.company, website: last.website, source: last.source };
+  if (SUBMIT_URL) { try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "founding_reservation", status: waitlist ? "waitlist" : "checkout started", ...who }) }); } catch {} }
+  if (waitlist) { btn.textContent = "On the waitlist ✓"; btn.disabled = true; btn.dataset.done = "1"; $("offerNote").textContent = "You're first in line if a spot opens. I'll email you."; return; }
+  if (!CHECKOUT_URL) { $("offerNote").textContent = "Checkout isn't connected yet. This is a preview."; return; }
+  const u = new URL(CHECKOUT_URL); u.searchParams.set("prefilled_email", last.email);
+  window.open(u.toString(), "_blank", "noopener");
+  $("offerNote").textContent = `Checkout opened in a new tab. Your spot is held once payment goes through. ${REFUND_NOTE}`;
 });
 })();
 </script>

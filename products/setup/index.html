@@ -813,7 +813,7 @@
 const FULL_PRICE = "$499";        // Guided Audit list price; empty = "Pricing at launch"
 const FOUNDING_PRICE = "$250";    // founding beta price, charged at reservation
 const BETA_SPOTS = "10";            // e.g. "25 brands"; empty = "Beta spots are limited."
-const CHECKOUT_URL = "";          // Stripe Payment Link for the founding price; empty = preview
+const CHECKOUT_URL = "https://link.clover.com/urlshortener/453NDQ";  // Clover payment link, $250 founding price; empty = preview
 const SUBMIT_URL = "";            // Apps Script web app URL; empty = preview mode (nothing is sent)
 const BETA_OPEN_DATE = "";        // the date lives in the founding beta section only
 const PARSE_SKILL = "the Corpuswave capture skill";  // placeholder name until the skill kit ships
@@ -1338,7 +1338,7 @@ $("reserveBtn").addEventListener("click", () => {
   if (SUBMIT_URL) { try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "founding_reservation", status: waitlist ? "waitlist" : "checkout started", ...who }) }); } catch {} }
   if (waitlist) { btn.textContent = "On the waitlist ✓"; btn.disabled = true; btn.dataset.done = "1"; $("offerNote").textContent = "You're first in line if a spot opens, and the email comes to you before anyone else hears about it."; return; }
   if (!CHECKOUT_URL) { $("offerNote").textContent = "Checkout isn't connected yet. This is a preview."; return; }
-  const u = new URL(CHECKOUT_URL); u.searchParams.set("prefilled_email", last.email);
+  const u = new URL(CHECKOUT_URL); if (u.hostname.endsWith("stripe.com")) u.searchParams.set("prefilled_email", last.email);
   window.open(u.toString(), "_blank", "noopener");
   $("offerNote").textContent = `Checkout opened in a new tab. Your spot is held once payment goes through. ${REFUND_NOTE}`;
 });

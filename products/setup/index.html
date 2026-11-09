@@ -69,6 +69,12 @@
   @media (max-width: 760px) { .hero { grid-template-columns: minmax(0, 1fr); text-align: center; } .photo { justify-self: center; max-width: 280px; } .hero .lede { margin-inline: auto; } .beta { justify-content: center; } }
 
   .process { list-style: none; counter-reset: p; margin: 18px 0 0; padding: 0; display: grid; gap: 2px; max-width: 470px; }
+  .process li.grp { counter-increment: none; display: block; padding: 8px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--rust); }
+  .process li.grp::before { content: none; }
+  .process li.grp.beta-grp { margin-top: 6px; padding-left: 12px; border-left: 2px solid var(--rust); }
+  .process li.inbeta { padding-left: 12px; border-left: 2px solid var(--rust); }
+  .multi { margin: 12px 0 0; max-width: 470px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+  .multi b { color: var(--ink); font-weight: 600; }
   .process li { counter-increment: p; display: grid; grid-template-columns: 26px auto minmax(0, 1fr) auto; column-gap: 10px; align-items: center; padding: 5px 0; }
   .process li::before { content: counter(p); width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--ink); display: grid; place-items: center; font-size: 12.5px; font-weight: 600; }
   .process b { font-weight: 600; font-size: 14.5px; white-space: nowrap; }
@@ -376,12 +382,15 @@
       <div>
         <h1>Build the foundation for your AI visibility strategy</h1>
         <ol class="process">
+          <li class="grp">Step 1 · Free · You start here today</li>
           <li class="now"><b>Audience intelligence</b><span>The questions your buyers ask</span></li>
-          <li><b>Prompt list</b><span>What AI gets asked</span></li>
-          <li><b>Prompt audit</b><span>Who AI cites for each</span></li>
-          <li><b>AI visibility baseline</b><span>How often AI cites you</span></li>
+          <li class="grp beta-grp">Steps 2 to 4 · Included in the Guided Audit beta</li>
+          <li class="inbeta"><b>Prompt list</b><span>What AI gets asked</span></li>
+          <li class="inbeta"><b>Prompt audit</b><span>Who AI cites for each</span></li>
+          <li class="inbeta"><b>AI visibility baseline</b><span>How often AI cites you</span></li>
           <li class="payoff"><b>Your AI visibility strategy</b><span>Yours to build, informed by all four</span></li>
         </ol>
+        <p class="multi"><b>Members run it for every audience and every client.</b> A dental practice can run it once for parents booking a child's first cleaning and again for adults pricing implants, since each group asks AI different questions.</p>
         <div class="about">
           <p class="about-lede">Corpuswave hands your team the process and logistics behind a proper AI visibility audit, plus insight on what the results mean, so the data can inform the strategy you build.</p>
           <div class="about-points">
@@ -390,7 +399,7 @@
             <div><span class="icon sm"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 11.5h7"/><path class="a" d="M8.5 15.5l2 2 4-4"/></svg></span><b>Ready to hand off</b><span>A research kit your team or a freelancer can run.</span></div>
           </div>
         </div>
-        <button class="pill" type="button" id="startBtn">Start the setup →</button>
+        <button class="pill" type="button" id="startBtn">Start step 1 →</button>
         <p class="fine" style="margin-top:12px">Built for consumer brands, with a B2B version on the way. <button class="linkbtn underline inline" type="button" id="proofBtn">See what this process has uncovered</button></p>
       </div>
     </section>
@@ -414,7 +423,7 @@
 
       <div class="method">
         <p>Each individual step is simple, and the key is using the data from each one to inform the next.</p>
-        <button class="pill" type="button" id="startBtn2">Start the setup →</button>
+        <button class="pill" type="button" id="startBtn2">Start step 1 →</button>
       </div>
   </dialog>
 
@@ -790,7 +799,7 @@
       <p>Your prompt list, prompt audit and AI visibility baseline, step by step, with guidance on what the results mean for your strategy.</p>
       <p>An audit is only accurate when the prompts match what customers actually ask. The beta builds yours from the research you just started.</p>
       <div class="offer-facts">
-        <p><b>Founding members pay half price.</b> The beta opens by the end of November, so your AI visibility strategy is in place before the new year.</p>
+        <p><b>Founding members pay half price.</b> The beta opens by the end of November, so your AI visibility strategy is in place before the new year. Your membership covers every audience and every client you run it for.</p>
       </div>
       <div class="offer-actions">
         <div class="pricecol">

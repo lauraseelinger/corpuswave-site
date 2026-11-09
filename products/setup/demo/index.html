@@ -402,32 +402,12 @@
           </div>
         </div>
         <button class="pill" type="button" id="startBtn">Start step 1 →</button>
-        <p class="fine" style="margin-top:12px">Built for consumer brands, with a B2B version on the way. Members can run it for every client and audience. <button class="linkbtn underline inline" type="button" id="proofBtn">See what this process has uncovered</button></p>
+        <p class="fine" style="margin-top:12px">Built for consumer brands, with a B2B version on the way. Members can run it for every client and audience.</p>
       </div>
     </section>
 
   </main>
 
-  <dialog id="proofDialog" aria-labelledby="proofDialogTitle">
-    <button class="linkbtn close" type="button" id="proofClose" aria-label="Close">✕</button>
-    <h2 id="proofDialogTitle" class="dlg-title" tabindex="-1" autofocus>What this process has uncovered</h2>
-
-      <div class="uncovered">
-        <p class="kicker" style="margin-bottom:16px">from <span style="text-transform:none">LSX Partners</span> client work</p>
-        <div class="proof-grid">
-          <article class="proof"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path class="a" d="M10 9.2v5.6l4.8-2.8z"/></svg></span><div><h3>Identify the sources shaping your buyers' AI answers</h3><ul><li>3% of the YouTube videos Gemini cited were the brand's own</li><li class="drove">Set the third-party content strategy</li></ul><p class="who">Med tech</p></div></article>
-          <article class="proof"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/><path class="a" d="M4 4l16 16"/></svg></span><div><h3>See where you disappear when buyers don't say your name</h3><ul><li>78% of unbranded "best for" answers left the brand out</li><li class="drove">Set the priorities for a new site navigation and content plan</li></ul><p class="who">Home hardware</p></div></article>
-          <article class="proof"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4"/><path class="a" d="M6 4.5h11l-2.5 4 2.5 4H6"/></svg></span><div><h3>Find the questions nobody in your category owns yet</h3><ul><li>57% of buyer questions got answers that named no firm at all</li><li class="drove">Became the first round of content briefs</li></ul><p class="who">Engineering and architecture</p></div></article>
-          <article class="proof"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path class="a" d="M12 3.5V12h8.5"/></svg></span><div><h3>Measure how much of AI's answer comes from you</h3><ul><li>0% of the sources AI cited came from the museum's own site</li><li class="drove">Pointed the content plan at local visitor questions</li></ul><p class="who">Regional art museum</p></div></article>
-        </div>
-        <p class="foot">From 2026 LSX Partners client work. Client names withheld.</p>
-      </div>
-
-      <div class="method">
-        <p>Each individual step is simple, and the key is using the data from each one to inform the next.</p>
-        <button class="pill" type="button" id="startBtn2">Start step 1 →</button>
-      </div>
-  </dialog>
 
   <!-- Flow -->
   <div id="flow" hidden>
@@ -1189,10 +1169,6 @@ function show(i) {
 }
 function start() { screen("flow"); show(0); }
 $("startBtn").addEventListener("click", start);
-$("startBtn2").addEventListener("click", () => { $("proofDialog").close(); start(); });
-$("proofBtn").addEventListener("click", () => $("proofDialog").showModal());
-$("proofClose").addEventListener("click", () => $("proofDialog").close());
-$("proofDialog").addEventListener("click", e => { if (e.target === $("proofDialog")) $("proofDialog").close(); });
 
 function paneErrors(key) {
   const e = [];

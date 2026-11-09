@@ -71,6 +71,8 @@
   .process { list-style: none; counter-reset: p; margin: 18px 0 0; padding: 0; display: grid; gap: 2px; max-width: 470px; }
   .process li.grp { counter-increment: none; display: block; padding: 8px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--rust); }
   .process li.grp::before { content: none; }
+  .process li.long { grid-template-columns: 26px minmax(0, 1fr); align-items: start; }
+  .process li.long .txt { line-height: 1.45; padding-top: 3px; }
   .process li.grp.beta-grp { margin-top: 6px; padding-left: 12px; border-left: 2px solid var(--rust); }
   .process li.inbeta { padding-left: 12px; border-left: 2px solid var(--rust); }
   .multi { margin: 12px 0 0; max-width: 470px; font-size: 13px; line-height: 1.5; color: var(--muted); }
@@ -383,12 +385,12 @@
         <h1>Build the foundation for your AI visibility strategy</h1>
         <ol class="process">
           <li class="grp">Step 1 · Free · You start here today</li>
-          <li class="now"><b>Audience intelligence</b><span>The questions your buyers ask</span></li>
+          <li class="now long"><div class="txt"><b>Audience intelligence</b> <span>– helps identify the actual questions and verbiage your audience uses when describing their situation to AI</span></div></li>
           <li class="grp beta-grp">Steps 2 to 4 · Included in the Guided Audit beta</li>
-          <li class="inbeta"><b>Prompt list</b><span>What AI gets asked</span></li>
-          <li class="inbeta"><b>Prompt audit</b><span>Who AI cites for each</span></li>
-          <li class="inbeta"><b>AI visibility baseline</b><span>How often AI cites you</span></li>
-          <li class="payoff"><b>Your AI visibility strategy</b><span>Yours to build, informed by all four</span></li>
+          <li class="inbeta"><b>Prompt list</b><span>– what AI gets asked</span></li>
+          <li class="inbeta"><b>Prompt audit</b><span>– who AI cites for each</span></li>
+          <li class="inbeta"><b>AI visibility baseline</b><span>– how often AI cites you</span></li>
+          <li class="payoff"><b>Your AI visibility strategy</b><span>– yours to build, informed by all four</span></li>
         </ol>
         <p class="multi"><b>Members run it for every audience and every client.</b> A dental practice can run it once for parents booking a child's first cleaning and again for adults pricing implants, since each group asks AI different questions.</p>
         <div class="about">

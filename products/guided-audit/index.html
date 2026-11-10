@@ -428,6 +428,7 @@
   .as-who { margin: 18px 0 0; font-size: 14px; color: var(--muted); }
   .as-who b { color: var(--ink); }
   #reserveBtn[disabled] { opacity: .7; cursor: default; }
+  #offerNote:empty { display: none; }
 </style>
 </head>
 <body>
@@ -464,7 +465,7 @@
         </div>
         <button class="pill" type="button" id="reserveBtn">Reserve my spot</button>
       </div>
-      <p class="fine" id="offerNote">You're charged $250 when you reserve. Change your mind before the beta opens and I'll refund you in full. Just email laura@lsxpartners.com.</p>
+      <p class="fine" id="offerNote"></p>
       <p class="fine" id="newsAlt">Not ready to pay? <button class="linkbtn underline inline" type="button" id="newsBtn">Send me Corpuswave guides and announcements</button></p>
     </section>
     <p class="fine">Haven't run step 1 yet? <a href="/products/setup/" style="color:var(--ink)">Start the free audience intelligence setup</a>.</p>
@@ -477,6 +478,7 @@
 const FULL_PRICE = "$499";
 const FOUNDING_PRICE = "$250";    // charged at reservation
 const BETA_SPOTS = "10";
+const SHOW_LEFT_AT = 7;           // show "N left" once spots drop to this or fewer
 const NEWS_ON = true;
 const CHECKOUT_URL = "https://link.clover.com/urlshortener/453NDQ";  // Clover payment link, $250
 const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbyeCz03lCJ6Udd1wzMvC58Mqzvrztx181dQq1o91Q305qof1GrAf88EtZs8Xtn3jhMVPQ/exec";
@@ -507,14 +509,13 @@ function who() {
   return { name: $("gaName").value.trim(), email, company: $("gaCompany").value.trim(), website: "", source: src };
 }
 
-const REFUND_NOTE = `You're charged ${FOUNDING_PRICE} when you reserve. Change your mind before the beta opens and I'll refund you in full. Just email laura@lsxpartners.com.`;
 $("pricePill").innerHTML = `<s>${FULL_PRICE}</s> <b>${FOUNDING_PRICE}</b>`;
 if (!NEWS_ON) $("newsAlt").hidden = true;
 let spotsLeft = null;
 function showSpots(left) {
   if (left == null) return;
   const full = left <= 0;
-  $("offerSpots").textContent = full ? `All ${BETA_SPOTS} beta spots are taken` : `Beta testing limited to ${BETA_SPOTS} members · ${left} left`;
+  $("offerSpots").textContent = full ? `All ${BETA_SPOTS} beta spots are taken` : `Beta testing limited to ${BETA_SPOTS} members${left <= SHOW_LEFT_AT ? ` · ${left} left` : ""}`;
   if (full) $("newsAlt").hidden = true;
   if (full && !$("reserveBtn").dataset.done) { $("reserveBtn").textContent = "Join the waitlist"; $("offerNote").textContent = "The waitlist is free. If a spot opens, I'll email you before anyone else."; }
 }
@@ -527,7 +528,7 @@ $("reserveBtn").addEventListener("click", () => {
   if (waitlist) { btn.textContent = "On the waitlist ✓"; btn.disabled = true; btn.dataset.done = "1"; $("offerNote").textContent = "You're first in line if a spot opens, and the email comes to you before anyone else hears about it."; return; }
   if (!CHECKOUT_URL) { $("offerNote").textContent = "Checkout isn't connected yet. This is a preview."; return; }
   window.open(CHECKOUT_URL, "_blank", "noopener");
-  $("offerNote").textContent = `Checkout opened in a new tab. Your spot is held once payment goes through. ${REFUND_NOTE}`;
+  $("offerNote").textContent = "Checkout opened in a new tab. Your spot is held once payment goes through.";
 });
 $("newsBtn").addEventListener("click", () => {
   const w = who(); if (!w) return;

@@ -1326,7 +1326,8 @@ function sendSetup(d) {
   try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "setup", ...d, findings, kit_b64, kit_name: kitName(d) }) }); } catch {}
 }
 let spotsLeft = null;
-const showSpots = left => { if (left == null) return; $("gaSpots").textContent = left <= 0 ? "all founding spots are taken, waitlist open" : `${left} of ${BETA_SPOTS} founding spots left`; };
+const SHOW_LEFT_AT = 7;  // show "N left" once spots drop to this or fewer
+const showSpots = left => { if (left == null) return; $("gaSpots").textContent = left <= 0 ? "all founding spots are taken, waitlist open" : left <= SHOW_LEFT_AT ? `only ${left} of ${BETA_SPOTS} founding spots left` : `for the first ${BETA_SPOTS} founding members`; };
 if (SUBMIT_URL) fetch(SUBMIT_URL + "?action=spots").then(r => r.json()).then(j => { spotsLeft = j.left; showSpots(spotsLeft); }).catch(() => {});
 $("kitBtn").addEventListener("click", () => { if (last) downloadKit(last); });
 if (!NEWS_ON) $("newsForm").hidden = true;

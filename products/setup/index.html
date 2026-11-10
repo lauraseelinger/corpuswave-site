@@ -457,7 +457,7 @@
         </div>
         <button class="pill" type="button" id="startBtn">Start step 1 →</button>
         <form class="news" id="newsForm" novalidate>
-          <label for="newsEmail">Not ready to start? Get Corpuswave beta news when it launches.</label>
+          <label for="newsEmail">Not ready to start? Get Corpuswave guides and announcements.</label>
           <div class="news-row"><input type="email" id="newsEmail" placeholder="you@company.com" autocomplete="email"><button type="submit">Keep me posted</button></div>
           <p class="news-msg" id="newsMsg" aria-live="polite"></p>
         </form>
@@ -787,12 +787,12 @@
       <ul class="logi">
         <li tabindex="0"><b>You</b><span class="logi-tip" role="tooltip">Block time and work down the Searches tab from the top. Keep the Count it and Skip it rules from Check 1 handy.</span></li>
         <li tabindex="0"><b>A teammate or intern</b><span class="logi-tip" role="tooltip">Share the folder and send them the message on the Start here tab.</span></li>
-        <li tabindex="0"><b>Freelancer/VA</b><span class="logi-tip" role="tooltip">Upwork and similar sites have research assistants for this. Look for manual research experience, then share the folder and the same message.</span></li>
+        <li tabindex="0"><b>Freelancer/VA</b><span class="logi-tip" role="tooltip">Hire a VA or freelancer to collect for you — brief them on what to look for/guardrails in collection.</span></li>
       </ul>
     </section>
 
     <section class="block">
-      <h2>What happens next</h2>
+      <h2>Next step: Prompt audit &amp; baseline</h2>
       <ol class="nextmap">
         <li class="now"><b>Audience intelligence</b><span>You kicked this off today. Once the capture file is complete, this step is done and informs the prompt list.</span></li>
       </ol>
@@ -825,7 +825,7 @@
         <button class="pill" type="button" id="reserveBtn">Reserve my spot</button>
       </div>
       <p class="fine" id="offerNote">You're charged $250 when you reserve. Change your mind before the beta opens and I'll refund you in full. Just email laura@lsxpartners.com.</p>
-      <p class="fine" id="newsAlt">Not ready to pay? <button class="linkbtn underline inline" type="button" id="newsBtn">Just send me beta news</button></p>
+      <p class="fine" id="newsAlt">Not ready to pay? <button class="linkbtn underline inline" type="button" id="newsBtn">Send me Corpuswave guides and announcements</button></p>
     </section>
     <p class="fine">These results use starting rules of thumb from a ten-minute check. The full plan goes deeper.</p>
   </div>
@@ -1356,7 +1356,7 @@ function sendNews(who, where) {
   if (!SUBMIT_URL) return;
   try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "beta_news", where, ...who }) }); } catch {}
 }
-const NEWS_DONE = "You're on the list for beta news, and you'll hear from me as soon as it opens.";
+const NEWS_DONE = "You're on the list for Corpuswave guides and announcements, including when the beta opens.";
 $("newsForm").addEventListener("submit", e => {
   e.preventDefault();
   const email = $("newsEmail").value.trim();

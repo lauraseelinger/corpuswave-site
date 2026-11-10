@@ -361,6 +361,7 @@
   .news-row button:hover { background: var(--ink); color: var(--bg); }
   .news-msg { margin: 6px 0 0; font-size: 13px; color: var(--rust); font-weight: 600; }
   .news-msg:empty { display: none; }
+  .news-results { margin: 24px 0 0; max-width: none; }
   @media (max-width: 760px) { .news { margin-inline: auto; text-align: left; } }
   .offer-facts { margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: var(--surface-2); }
   .offer-facts p { margin: 0 0 6px; font-size: 14px; }
@@ -389,6 +390,7 @@
   .ga-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; font-size: 13px; color: var(--muted); }
   .ga-price s { font-size: 14px; text-decoration-color: var(--rust); text-decoration-thickness: 2px; }
   .ga-price b { font-size: 18px; color: var(--rust); }
+  .bb-note a { color: var(--rust); font-weight: 600; text-underline-offset: 3px; }
   .ga-btn { min-width: 0; padding: 12px 22px; text-decoration: none; }
   .betagroup { margin: 10px 0 6px; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--rust); background: color-mix(in srgb, var(--rust) 7%, transparent); }
   .kittabs { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
@@ -444,7 +446,7 @@
               <li><b>AI visibility baseline</b><span>– how often AI cites you</span></li>
             </ol>
             <p class="bb-price"><s>$499</s> <b>$250</b> <span>for founding members</span> <em>Only 10 spots</em></p>
-            <p class="bb-note">Reserve yours on your results page after step 1.</p>
+            <p class="bb-note">Reserve yours on your results page after step 1, or <a class="skipLink" href="/products/guided-audit/">skip ahead and reserve now</a>.</p>
             </div>
             <div class="sb-goal">
               <ol class="process inner0"><li class="payoff long"><div class="txt"><b>Your AI visibility strategy</b> <span>– yours to build, informed by all four</span></div></li></ol>
@@ -810,6 +812,12 @@
         <li class="payoff off"><b>Your AI visibility strategy</b><span>Yours to build, informed by all four. Want a strategist to build it with you? <a href="https://lsxpartners.com/contact" target="_blank" rel="noopener">Reach out for an intro call</a>.</span></li>
       </ol>
     </section>
+
+    <form class="news news-results" id="newsForm2" novalidate>
+      <label for="newsEmail2">Get updates about the latest Corpuswave AI visibility strategic guides.</label>
+      <div class="news-row"><input type="email" id="newsEmail2" placeholder="you@company.com" autocomplete="email"><button type="submit">Keep me posted</button></div>
+      <p class="news-msg" id="newsMsg2" aria-live="polite"></p>
+    </form>
 
     <p class="fine">These results use starting rules of thumb from a ten-minute check. The full plan goes deeper.</p>
   </div>
@@ -1314,6 +1322,7 @@ function renderResult(d) {
   $("kitCount").textContent = `– all ${searchesFor(d).length} searches, each with a link and a done column`;
   const ga = "/products/guided-audit/#" + new URLSearchParams({ n: d.name || "", e: d.email || "", c: d.company || "", w: d.website || "", s: d.source || "" });
   document.querySelectorAll(".gaLink").forEach(a => { a.href = ga; });
+  if (!$("newsEmail2").value) $("newsEmail2").value = d.email || "";
   showSpots(spotsLeft);
 }
 function sendSetup(d) {
@@ -1329,19 +1338,23 @@ const SHOW_LEFT_AT = 7;  // show "N left" once spots drop to this or fewer
 const showSpots = left => { if (left == null) return; $("gaSpots").textContent = left <= 0 ? "all founding spots are taken, waitlist open" : left <= SHOW_LEFT_AT ? `only ${left} of ${BETA_SPOTS} founding spots left` : `for the first ${BETA_SPOTS} founding members`; };
 if (SUBMIT_URL) fetch(SUBMIT_URL + "?action=spots").then(r => r.json()).then(j => { spotsLeft = j.left; showSpots(spotsLeft); }).catch(() => {});
 $("kitBtn").addEventListener("click", () => { if (last) downloadKit(last); });
-if (!NEWS_ON) $("newsForm").hidden = true;
+if (!NEWS_ON) { $("newsForm").hidden = true; $("newsForm2").hidden = true; }
+{ const src = new URLSearchParams(location.search).get("src"); if (src) document.querySelectorAll(".skipLink").forEach(a => { a.href += "?src=" + encodeURIComponent(src); }); }
 function sendNews(who, where) {
   if (!SUBMIT_URL) return;
   try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "beta_news", where, ...who }) }); } catch {}
 }
 const NEWS_DONE = "You're on the list for Corpuswave guides and announcements, including when the beta opens.";
-$("newsForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const email = $("newsEmail").value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { $("newsMsg").textContent = "Check the email address and try again."; return; }
-  sendNews({ email, source: new URLSearchParams(location.search).get("src") || "" }, "intro");
-  $("newsForm").querySelector(".news-row").hidden = true;
-  $("newsMsg").textContent = NEWS_DONE;
+[["newsForm", "newsEmail", "newsMsg", "intro"], ["newsForm2", "newsEmail2", "newsMsg2", "results"]].forEach(([form, input, msg, where]) => {
+  $(form).addEventListener("submit", e => {
+    e.preventDefault();
+    const email = $(input).value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { $(msg).textContent = "Check the email address and try again."; return; }
+    const who = where === "results" && last ? { name: last.name, company: last.company, website: last.website } : {};
+    sendNews({ ...who, email, source: new URLSearchParams(location.search).get("src") || "" }, where);
+    $(form).querySelector(".news-row").hidden = true;
+    $(msg).textContent = NEWS_DONE;
+  });
 });
 })();
 </script>

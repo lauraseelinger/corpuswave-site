@@ -73,8 +73,17 @@
   .process li.grp::before { content: none; }
   .process li.long { grid-template-columns: 26px minmax(0, 1fr); align-items: start; }
   .process li.long .txt { line-height: 1.45; padding-top: 3px; }
-  .process li.grp.beta-grp { margin-top: 6px; padding-left: 12px; border-left: 2px solid var(--rust); }
-  .process li.inbeta { padding-left: 12px; border-left: 2px solid var(--rust); }
+  .process li.betabox { counter-increment: none; display: block; margin: 10px 0 4px; padding: 14px 16px 10px; border: 1.5px solid var(--rust); border-radius: 14px; background: color-mix(in srgb, var(--rust) 7%, transparent); }
+  .process li.betabox::before { content: none; }
+  .betabox .bb-h { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--rust); }
+  .betabox .bb-why { margin: 6px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--ink); }
+  .betabox .bb-price { margin: 8px 0 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; font-size: 12.5px; color: var(--muted); }
+  .betabox .bb-price s { font-size: 14px; text-decoration-color: var(--rust); text-decoration-thickness: 2px; }
+  .betabox .bb-price b { font-size: 18px; color: var(--rust); }
+  .betabox .bb-price span { font-size: 12.5px; color: var(--muted); }
+  .betabox .bb-price em { font-style: normal; font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--rust-ink); background: var(--rust); padding: 3px 8px; border-radius: 999px; }
+  .betabox .bb-note { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+  .process.inner { counter-reset: p 1; margin-top: 6px; max-width: none; }
   .multi { margin: 12px 0 0; max-width: 470px; font-size: 13px; line-height: 1.5; color: var(--muted); }
   .multi b { color: var(--ink); font-weight: 600; }
   .process li { counter-increment: p; display: grid; grid-template-columns: 26px auto minmax(0, 1fr) auto; column-gap: 10px; align-items: center; padding: 5px 0; }
@@ -386,10 +395,17 @@
         <ol class="process">
           <li class="grp">Step 1 · Free · You start here today</li>
           <li class="now long"><div class="txt"><b>Audience intelligence</b> <span>– helps identify the actual questions and verbiage your audience uses when describing their situation to AI</span></div></li>
-          <li class="grp beta-grp">Steps 2 to 4 · Included in the Guided Audit beta</li>
-          <li class="inbeta"><b>Prompt list</b><span>– what AI gets asked</span></li>
-          <li class="inbeta"><b>Prompt audit</b><span>– who AI cites for each</span></li>
-          <li class="inbeta"><b>AI visibility baseline</b><span>– how often AI cites you</span></li>
+          <li class="betabox">
+            <p class="bb-h">Steps 2 to 4 · The Guided Audit beta</p>
+            <p class="bb-why">Step 1 tells you what your buyers ask. These steps show whether AI recommends you when they ask it, and who it recommends instead.</p>
+            <ol class="process inner">
+              <li><b>Prompt list</b><span>– what AI gets asked</span></li>
+              <li><b>Prompt audit</b><span>– who AI cites for each</span></li>
+              <li><b>AI visibility baseline</b><span>– how often AI cites you</span></li>
+            </ol>
+            <p class="bb-price"><s>$499</s> <b>$250</b> <span>for founding members</span> <em>Only 10 spots</em></p>
+            <p class="bb-note">Reserve yours on your results page after step 1.</p>
+          </li>
           <li class="payoff"><b>Your AI visibility strategy</b><span>– yours to build, informed by all four</span></li>
         </ol>
         <div class="about">

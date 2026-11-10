@@ -353,7 +353,6 @@
   .pricecol { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
   .pricecap { color: var(--rust); font-size: 12px; font-weight: 600; }
   .offer-actions { align-items: flex-start; }
-  #reserveBtn[disabled] { opacity: .7; cursor: default; }
   .news { margin: 16px 0 0; max-width: 470px; }
   .news label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
   .news-row { display: flex; gap: 8px; }
@@ -387,6 +386,11 @@
   .nextmap li.payoff::before { content: "★"; background: var(--ink); border-color: var(--ink); color: var(--bg); }
   .nextmap span { grid-column: 2; font-size: 13.5px; color: var(--muted); }
   .nextmap a { color: var(--ink); text-underline-offset: 3px; }
+  .ga-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--rust) 35%, transparent); }
+  .ga-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; font-size: 13px; color: var(--muted); }
+  .ga-price s { font-size: 14px; text-decoration-color: var(--rust); text-decoration-thickness: 2px; }
+  .ga-price b { font-size: 18px; color: var(--rust); }
+  .ga-btn { min-width: 0; padding: 12px 22px; text-decoration: none; }
   .betagroup { margin: 10px 0 6px; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--rust); background: color-mix(in srgb, var(--rust) 7%, transparent); }
   .kittabs { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
   .kittabs li { font-size: 14.5px; line-height: 1.5; }
@@ -458,11 +462,11 @@
         </div>
         <button class="pill" type="button" id="startBtn">Start step 1 →</button>
         <form class="news" id="newsForm" novalidate>
-          <label for="newsEmail">Not ready to start? Get Corpuswave guides and announcements.</label>
+          <label for="newsEmail">Get updates about the latest Corpuswave AI visibility strategic guides.</label>
           <div class="news-row"><input type="email" id="newsEmail" placeholder="you@company.com" autocomplete="email"><button type="submit">Keep me posted</button></div>
           <p class="news-msg" id="newsMsg" aria-live="polite"></p>
         </form>
-        <p class="fine" style="margin-top:12px">Built for consumer brands, with a B2B version on the way. Members can run it for every client and audience.</p>
+        <p class="fine" style="margin-top:12px">B2B/industrial guide coming early 2027.</p>
       </div>
     </section>
 
@@ -776,13 +780,13 @@
     </section>
     <section class="block">
       <h2>Your audience intelligence research list</h2>
+      <p style="margin:14px 0 18px"><button class="pill" type="button" id="kitBtn">Download your research kit</button></p>
       <p class="muted" style="margin:0">Spreadsheet contains three tabs:</p>
       <ul class="kittabs">
         <li><b>Start here</b> <span>– the steps, plus a message to send whoever runs the searches</span></li>
         <li><b>Searches</b> <span id="kitCount">– every search, each with a link and a done column</span></li>
         <li><b>Capture</b> <span>– one thread or post per row with the link, full text and every comment. Open every reply, then Cmd+A and Cmd+C (Ctrl on a PC) copies the whole thread.</span></li>
       </ul>
-      <p style="margin:18px 0 0"><button class="pill" type="button" id="kitBtn">Download your research kit</button></p>
       <p class="logi-h"><b>Data collection tip:</b> hire a freelancer or VA to assist</p>
     </section>
 
@@ -792,36 +796,22 @@
         <li class="now"><b>Audience intelligence</b><span>You kicked this off today. Once the capture file is complete, this step is done and informs the prompt list.</span></li>
       </ol>
       <div class="betagroup">
-        <p class="bg-h">Available in beta, <a href="#offer">reserve your spot</a></p>
+        <p class="bg-h">Available in beta, <a class="gaLink" href="/products/guided-audit/" target="_blank" rel="noopener">reserve your spot</a></p>
         <ol class="nextmap" style="counter-reset: nm 1">
           <li><b>Prompt list</b><span>The questions and language your buyers use become the prompts to track.</span></li>
           <li><b>Prompt audit</b><span>See who AI cites when your buyers ask those prompts.</span></li>
           <li><b>AI visibility baseline</b><span>Measure how often AI cites you before you change anything.</span></li>
         </ol>
+        <div class="ga-row">
+          <span class="ga-price"><s>$499</s> <b>$250</b> <span id="gaSpots">for the first 10 founding members</span></span>
+          <a class="pill ga-btn gaLink" href="/products/guided-audit/" target="_blank" rel="noopener">Reserve your spot ↗</a>
+        </div>
       </div>
       <ol class="nextmap">
         <li class="payoff off"><b>Your AI visibility strategy</b><span>Yours to build, informed by all four. Want a strategist to build it with you? <a href="https://lsxpartners.com/contact" target="_blank" rel="noopener">Reach out for an intro call</a>.</span></li>
       </ol>
     </section>
 
-    <section class="block offer" id="offer">
-      <p style="margin:0"><span class="betapill">Beta version</span></p>
-      <h2>Corpuswave Guided Audit</h2>
-      <p>Your prompt list, prompt audit and AI visibility baseline, step by step, with guidance on what the results mean for your strategy.</p>
-      <p>An audit is only accurate when the prompts match what customers actually ask. The beta builds yours from the research you just started.</p>
-      <div class="offer-facts">
-        <p><b>Founding members pay half price.</b> The beta opens by the end of November, so your AI visibility strategy is in place before the new year. Your membership covers every audience and every client you run it for.</p>
-      </div>
-      <div class="offer-actions">
-        <div class="pricecol">
-          <span class="pricepill" id="pricePill" aria-label="Price"><s>$499</s> <b>$250</b></span>
-          <span class="pricecap" id="offerSpots">Beta testing limited to 10 members</span>
-        </div>
-        <button class="pill" type="button" id="reserveBtn">Reserve my spot</button>
-      </div>
-      <p class="fine" id="offerNote">You're charged $250 when you reserve. Change your mind before the beta opens and I'll refund you in full. Just email laura@lsxpartners.com.</p>
-      <p class="fine" id="newsAlt">Not ready to pay? <button class="linkbtn underline inline" type="button" id="newsBtn">Send me Corpuswave guides and announcements</button></p>
-    </section>
     <p class="fine">These results use starting rules of thumb from a ten-minute check. The full plan goes deeper.</p>
   </div>
 </div>
@@ -1323,8 +1313,8 @@ function renderResult(d) {
   });
   if (!wl.length) $("rSources").innerHTML = '<p class="muted" style="margin:0">Your checks didn\'t point to one clear source yet. Start with the Reddit searches in your kit, since they\'re built from your exact questions.</p>';
   $("kitCount").textContent = `– all ${searchesFor(d).length} searches, each with a link and a done column`;
-  $("offerSpots").textContent = BETA_SPOTS ? `Beta testing limited to ${BETA_SPOTS} members` : "Beta spots are limited";
-  $("pricePill").innerHTML = FULL_PRICE ? `<s>${FULL_PRICE}</s> <b>${FOUNDING_PRICE}</b>` : "Pricing at launch";
+  const ga = "/products/guided-audit/#" + new URLSearchParams({ n: d.name || "", e: d.email || "", c: d.company || "", w: d.website || "", s: d.source || "" });
+  document.querySelectorAll(".gaLink").forEach(a => { a.href = ga; });
   showSpots(spotsLeft);
 }
 function sendSetup(d) {
@@ -1335,18 +1325,11 @@ function sendSetup(d) {
   try { kit_b64 = XLSX.write(buildKit(d), { type: "base64", bookType: "xlsx" }); } catch {}
   try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "setup", ...d, findings, kit_b64, kit_name: kitName(d) }) }); } catch {}
 }
-const REFUND_NOTE = `You're charged ${FOUNDING_PRICE} when you reserve. Change your mind before the beta opens and I'll refund you in full. Just email laura@lsxpartners.com.`;
-function showSpots(left) {
-  if (left == null) return;
-  const full = left <= 0;
-  $("offerSpots").textContent = full ? `All ${BETA_SPOTS} beta spots are taken` : `Beta testing limited to ${BETA_SPOTS} members · ${left} left`;
-  if (full || !NEWS_ON) $("newsAlt").hidden = true;
-  if (full && !$("reserveBtn").dataset.done) { $("reserveBtn").textContent = "Join the waitlist"; $("offerNote").textContent = "The waitlist is free. If a spot opens, I'll email you before anyone else."; }
-}
 let spotsLeft = null;
+const showSpots = left => { if (left == null) return; $("gaSpots").textContent = left <= 0 ? "all founding spots are taken, waitlist open" : `${left} of ${BETA_SPOTS} founding spots left`; };
 if (SUBMIT_URL) fetch(SUBMIT_URL + "?action=spots").then(r => r.json()).then(j => { spotsLeft = j.left; showSpots(spotsLeft); }).catch(() => {});
 $("kitBtn").addEventListener("click", () => { if (last) downloadKit(last); });
-if (!NEWS_ON) { $("newsForm").hidden = true; $("newsAlt").hidden = true; }
+if (!NEWS_ON) $("newsForm").hidden = true;
 function sendNews(who, where) {
   if (!SUBMIT_URL) return;
   try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "beta_news", where, ...who }) }); } catch {}
@@ -1359,22 +1342,6 @@ $("newsForm").addEventListener("submit", e => {
   sendNews({ email, source: new URLSearchParams(location.search).get("src") || "" }, "intro");
   $("newsForm").querySelector(".news-row").hidden = true;
   $("newsMsg").textContent = NEWS_DONE;
-});
-$("newsBtn").addEventListener("click", () => {
-  if (!last) return;
-  sendNews({ name: last.name, email: last.email, company: last.company, website: last.website, source: last.source }, "results");
-  $("newsAlt").textContent = NEWS_DONE;
-});
-$("reserveBtn").addEventListener("click", () => {
-  if (!last) return;
-  const btn = $("reserveBtn"), waitlist = spotsLeft === 0;
-  const who = { name: last.name, email: last.email, company: last.company, website: last.website, source: last.source };
-  if (SUBMIT_URL) { try { fetch(SUBMIT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "founding_reservation", status: waitlist ? "waitlist" : "checkout started", ...who }) }); } catch {} }
-  if (waitlist) { btn.textContent = "On the waitlist ✓"; btn.disabled = true; btn.dataset.done = "1"; $("offerNote").textContent = "You're first in line if a spot opens, and the email comes to you before anyone else hears about it."; return; }
-  if (!CHECKOUT_URL) { $("offerNote").textContent = "Checkout isn't connected yet. This is a preview."; return; }
-  const u = new URL(CHECKOUT_URL); if (u.hostname.endsWith("stripe.com")) u.searchParams.set("prefilled_email", last.email);
-  window.open(u.toString(), "_blank", "noopener");
-  $("offerNote").textContent = `Checkout opened in a new tab. Your spot is held once payment goes through. ${REFUND_NOTE}`;
 });
 })();
 </script>

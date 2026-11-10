@@ -77,6 +77,9 @@
   .process li.stepsbox { counter-increment: none; display: block; margin: 6px 0 4px; padding: 0; border: 1.5px solid var(--rust); border-radius: 14px; overflow: hidden; }
   .stepsbox .sb-free { padding: 12px 16px 8px; }
   .stepsbox .sb-beta { padding: 12px 16px 12px; border-top: 1px solid color-mix(in srgb, var(--rust) 35%, transparent); background: color-mix(in srgb, var(--rust) 12%, transparent); }
+  .stepsbox .sb-goal { padding: 6px 16px 8px; border-top: 1px solid color-mix(in srgb, var(--rust) 35%, transparent); }
+  .stepsbox .sb-goal li.payoff { margin-top: 0; padding-top: 5px; border-top: 0; }
+  .stepsbox .sb-goal .txt b, .stepsbox .sb-goal .txt span { opacity: .55; }
   .process.inner0 { counter-reset: p 0; margin-top: 4px; max-width: none; }
   .process li.stepsbox::before { content: none; }
   .stepsbox .bb-h { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--rust); }
@@ -415,8 +418,10 @@
             <p class="bb-price"><s>$499</s> <b>$250</b> <span>for founding members</span> <em>Only 10 spots</em></p>
             <p class="bb-note">Reserve yours on your results page after step 1.</p>
             </div>
+            <div class="sb-goal">
+              <ol class="process inner0"><li class="payoff long"><div class="txt"><b>Your AI visibility strategy</b> <span>– yours to build, informed by all four</span></div></li></ol>
+            </div>
           </li>
-          <li class="payoff"><b>Your AI visibility strategy</b><span>– yours to build, informed by all four</span></li>
         </ol>
         <div class="about">
           <p class="about-lede">Corpuswave hands your team the process and logistics behind a proper AI visibility audit, plus insight on what the results mean, so the data can inform the strategy you build.</p>

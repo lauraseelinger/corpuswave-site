@@ -387,7 +387,19 @@
   .nextmap li.payoff::before { content: "★"; background: var(--ink); border-color: var(--ink); color: var(--bg); }
   .nextmap span { grid-column: 2; font-size: 13.5px; color: var(--muted); }
   .nextmap a { color: var(--ink); text-underline-offset: 3px; }
-  .betagroup { margin: 10px 0 6px; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--ink); }
+  .betagroup { margin: 10px 0 6px; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--rust); background: color-mix(in srgb, var(--rust) 7%, transparent); }
+  .kittabs { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+  .kittabs li { font-size: 14.5px; line-height: 1.5; }
+  .kittabs span { color: var(--muted); font-size: 14px; }
+  .logi-h { margin: 26px 0 4px; font: 600 16px var(--body); }
+  .logi { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .logi li { position: relative; padding: 7px 14px; border: 1px dashed var(--muted); border-radius: 999px; font-size: 14px; cursor: help; }
+  .logi li b { font-weight: 600; }
+  .logi li::after { content: "ⓘ"; margin-left: 6px; color: var(--rust); font-size: 12px; }
+  .logi-tip { display: none; position: absolute; left: 0; bottom: calc(100% + 8px); z-index: 5; width: min(280px, 80vw); padding: 10px 12px; border-radius: 10px; background: var(--ink); color: var(--bg); font-size: 12.5px; line-height: 1.45; box-shadow: 0 10px 24px -12px rgba(0,0,0,.5); }
+  .logi li:hover .logi-tip, .logi li:focus .logi-tip, .logi li:focus-within .logi-tip { display: block; }
+  .logi li:focus { outline: 2px solid var(--rust); outline-offset: 2px; }
+  .logi li:last-child .logi-tip { left: auto; right: 0; }
   .bg-h { margin: 0 0 4px; font: italic 800 14.5px var(--sub); text-transform: lowercase; }
   .bg-h a { color: var(--rust); text-underline-offset: 3px; }
   .nextmap li.payoff.off b, .nextmap li.payoff.off::before { opacity: .45; }
@@ -761,28 +773,23 @@
         <div><span class="f-k">Google forums</span><p id="fForums"></p></div>
         <div><span class="f-k">AI sources</span><p id="fAI"></p></div>
       </div>
-      <p class="fine">A ten-minute spot check you ran yourself. The full reasoning is on the <span class="tabname">Start here</span> tab of your kit.</p>
     </section>
     <section class="block">
-      <h2>Your research kit</h2>
-      <p class="muted" style="margin:0">Everything you need to finish the research is in one spreadsheet.</p>
-      <div class="tabs3">
-        <div><b class="tabname">Start here</b><span>Read this one first. It walks through the steps and has a message you can copy and send to whoever's doing the searching.</span></div>
-        <div><b class="tabname">Searches</b><span id="kitCount">Every search built from your answers, each with a link, who it's for and a done column.</span></div>
-        <div><b class="tabname">Capture</b><span>Where the good stuff goes. Paste one thread or post per row, with the link, the full text and every comment. To grab a whole thread at once, open every reply, then press <span class="kbd">Cmd</span>+<span class="kbd">A</span> and <span class="kbd">Cmd</span>+<span class="kbd">C</span> (<span class="kbd">Ctrl</span> on a PC) and paste it in.</span></div>
-      </div>
-      <p style="margin:20px 0 0"><button class="pill" type="button" id="kitBtn">Download your research kit</button></p>
-      <p class="fine" style="margin-top:10px">The steps and a message for whoever runs the searches are on the <span class="tabname">Start here</span> tab. A copy is also on its way to your inbox.</p>
-    </section>
-
-    <section class="block">
-      <h2>Who should run it</h2>
-      <p class="muted" style="margin:0">It's methodical, not technical, so anyone careful can do it.</p>
-      <div class="who3">
-        <div><b>You</b><span>Block time on your calendar and work down the Searches tab from the top. Keep the Count it and Skip it rules from Check 1 handy.</span></div>
-        <div><b>A teammate or intern</b><span>Share the folder and send them the message on the Start here tab. It spells out exactly what to grab.</span></div>
-        <div><b>A freelancer</b><span>Upwork and similar sites have research assistants who do this kind of work. Look for someone with manual research experience, then share the folder and send the same message.</span></div>
-      </div>
+      <h2>Your audience intelligence research list</h2>
+      <p class="muted" style="margin:0">Spreadsheet contains three tabs:</p>
+      <ul class="kittabs">
+        <li><b>Start here</b> <span>– the steps, plus a message to send whoever runs the searches</span></li>
+        <li><b>Searches</b> <span id="kitCount">– every search, each with a link and a done column</span></li>
+        <li><b>Capture</b> <span>– one thread or post per row with the link, full text and every comment. Open every reply, then Cmd+A and Cmd+C (Ctrl on a PC) copies the whole thread.</span></li>
+      </ul>
+      <p style="margin:18px 0 0"><button class="pill" type="button" id="kitBtn">Download your research kit</button></p>
+      <h3 class="logi-h">Data collection logistics</h3>
+      <p class="muted" style="margin:0">It's methodical, not technical, so anyone careful can run it.</p>
+      <ul class="logi">
+        <li tabindex="0"><b>You</b><span class="logi-tip" role="tooltip">Block time and work down the Searches tab from the top. Keep the Count it and Skip it rules from Check 1 handy.</span></li>
+        <li tabindex="0"><b>A teammate or intern</b><span class="logi-tip" role="tooltip">Share the folder and send them the message on the Start here tab.</span></li>
+        <li tabindex="0"><b>Freelancer/VA</b><span class="logi-tip" role="tooltip">Upwork and similar sites have research assistants for this. Look for manual research experience, then share the folder and the same message.</span></li>
+      </ul>
     </section>
 
     <section class="block">
@@ -1284,7 +1291,7 @@ $("betaForm").addEventListener("submit", async e => {
 
 function renderResult(d) {
   $("rHello").textContent = `${d.name.split(" ")[0]}, here's what your checks showed`;
-  $("rBody").textContent = `Built from your ${d.problems.length} buyer questions and ${d.segments.length} persona${d.segments.length === 1 ? "" : "s"}. Start with the sources at the top of the list.`;
+  $("rBody").textContent = `Built from your ${d.problems.length} buyer questions and ${d.segments.length} persona${d.segments.length === 1 ? "" : "s"}.`;
   const counts = aiCounts(d), n = (d.ai_sources_by_question || []).length;
   const hits = (d.threads || []).filter(t => t === "1-2" || t === "3+").length, qn = d.problems.length;
   const strong = hits * 2 >= qn, aiR = !!counts.reddit, local = subs(d.community_local)[0];
@@ -1321,7 +1328,7 @@ function renderResult(d) {
     div.append(t, p); $("rSources").append(div);
   });
   if (!wl.length) $("rSources").innerHTML = '<p class="muted" style="margin:0">Your checks didn\'t point to one clear source yet. Start with the Reddit searches in your kit, since they\'re built from your exact questions.</p>';
-  $("kitCount").textContent = `All ${searchesFor(d).length} searches, ready to run. Click the link in each row and mark it done when you're finished.`;
+  $("kitCount").textContent = `– all ${searchesFor(d).length} searches, each with a link and a done column`;
   $("offerSpots").textContent = BETA_SPOTS ? `Beta testing limited to ${BETA_SPOTS} members` : "Beta spots are limited";
   $("pricePill").innerHTML = FULL_PRICE ? `<s>${FULL_PRICE}</s> <b>${FOUNDING_PRICE}</b>` : "Pricing at launch";
   showSpots(spotsLeft);

@@ -331,6 +331,8 @@
   .found { display: grid; gap: 12px; margin-top: 8px; }
   .found > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
   .found > div:first-child { border-top: 0; }
+  .found[hidden] { display: none; }
+  .tabs3 span .kbd { display: inline-block; min-width: 0; padding: 0 5px; margin: 0 1px; font-size: 11px; line-height: 1.5; color: var(--ink); }
   @media (max-width: 560px) { .found > div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
   .f-k { font-weight: 600; }
   .found p { margin: 0; font-size: 14px; }
@@ -751,17 +753,15 @@
     <h1>Your audience research plan</h1>
     <p class="lede" id="rBody"></p>
     <section class="block">
-      <h2>What your checks mean</h2>
-      <div class="found">
+      <h2>What your checks found</h2>
+      <p class="muted" id="rVerdict" style="margin:0"></p>
+      <div id="rSources" style="margin-top:8px"></div>
+      <div class="found" hidden>
         <div><span class="f-k">Reddit</span><p id="fReddit"></p></div>
         <div><span class="f-k">Google forums</span><p id="fForums"></p></div>
         <div><span class="f-k">AI sources</span><p id="fAI"></p></div>
       </div>
-      <p class="fine">This is a ten-minute spot check you ran yourself. The prompt audit runs every prompt the same way, so the patterns hold up.</p>
-    </section>
-    <section class="block">
-      <h2>Where to look</h2>
-      <div id="rSources"></div>
+      <p class="fine">A ten-minute spot check you ran yourself. The full reasoning is on the <span class="tabname">Start here</span> tab of your kit.</p>
     </section>
     <section class="block">
       <h2>Your research kit</h2>
@@ -769,9 +769,10 @@
       <div class="tabs3">
         <div><b class="tabname">Start here</b><span>Read this one first. It walks through the steps and has a message you can copy and send to whoever's doing the searching.</span></div>
         <div><b class="tabname">Searches</b><span id="kitCount">Every search built from your answers, each with a link, who it's for and a done column.</span></div>
-        <div><b class="tabname">Capture</b><span>Where the good stuff goes. Paste one thread or post per row, with the link, the full text and every comment, and how many upvotes or comments it got.</span></div>
+        <div><b class="tabname">Capture</b><span>Where the good stuff goes. Paste one thread or post per row, with the link, the full text and every comment. To grab a whole thread at once, open every reply, then press <span class="kbd">Cmd</span>+<span class="kbd">A</span> and <span class="kbd">Cmd</span>+<span class="kbd">C</span> (<span class="kbd">Ctrl</span> on a PC) and paste it in.</span></div>
       </div>
-      <p style="margin:20px 0 0"><a class="pill" href="#getKit" id="toKit">Get your research kit ↓</a></p>
+      <p style="margin:20px 0 0"><button class="pill" type="button" id="kitBtn">Download your research kit</button></p>
+      <p class="fine" style="margin-top:10px">The steps and a message for whoever runs the searches are on the <span class="tabname">Start here</span> tab. A copy is also on its way to your inbox.</p>
     </section>
 
     <section class="block">
@@ -782,25 +783,6 @@
         <div><b>A teammate or intern</b><span>Share the folder and send them the message on the Start here tab. It spells out exactly what to grab.</span></div>
         <div><b>A freelancer</b><span>Upwork and similar sites have research assistants who do this kind of work. Look for someone with manual research experience, then share the folder and send the same message.</span></div>
       </div>
-    </section>
-
-    <section class="block">
-      <h2>Step by step</h2>
-      <ol class="kit" id="kitSteps"></ol>
-      <div class="tip copytip"><span class="tip-label">copy a whole thread fast</span>
-        <ol>
-          <li>Open the thread and click <b>View more comments</b> or <b>Load more replies</b> until every reply shows. Collapsed comments don't copy.</li>
-          <li>Select everything on the page with <span class="kbd">Cmd</span>+<span class="kbd">A</span> on a Mac or <span class="kbd">Ctrl</span>+<span class="kbd">A</span> on a PC.</li>
-          <li>Copy it with <span class="kbd">Cmd</span>+<span class="kbd">C</span> or <span class="kbd">Ctrl</span>+<span class="kbd">C</span>, then paste it into the captured text column of the <span class="tabname">Capture</span> tab.</li>
-        </ol>
-        <p class="tip-foot">Leftover menu text from the page is fine to leave in.</p>
-      </div>
-    </section>
-
-    <section class="block" id="getKit">
-      <h2>Download your research kit</h2>
-      <p class="muted" style="margin:0">The steps and the copy tip are inside too, on the <span class="tabname">Start here</span> tab. A copy is also on its way to your inbox.</p>
-      <p style="margin:18px 0 0"><button class="pill" type="button" id="kitBtn">Download your research kit</button></p>
     </section>
 
     <section class="block">
@@ -850,8 +832,8 @@
 /* ---- Settings ---- */
 const FULL_PRICE = "$499";        // Guided Audit list price; empty = "Pricing at launch"
 const FOUNDING_PRICE = "$250";    // founding beta price, charged at reservation
-const BETA_SPOTS = "10";
-const NEWS_ON = false;            // beta news signup; true once Code.gs with beta_news is deployed            // e.g. "25 brands"; empty = "Beta spots are limited."
+const BETA_SPOTS = "10";            // e.g. "25 brands"; empty = "Beta spots are limited."
+const NEWS_ON = false;            // beta news signup; true once Code.gs with beta_news is deployed
 const CHECKOUT_URL = "https://link.clover.com/urlshortener/453NDQ";  // Clover payment link, $250 founding price; empty = preview
 const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbyeCz03lCJ6Udd1wzMvC58Mqzvrztx181dQq1o91Q305qof1GrAf88EtZs8Xtn3jhMVPQ/exec";            // Apps Script web app URL; empty = preview mode (nothing is sent)
 const BETA_OPEN_DATE = "";        // the date lives in the founding beta section only
@@ -1101,14 +1083,14 @@ function whereToLook(d) {
   const threadHits = (d.threads || []).filter(t => t === "1-2" || t === "3+").length, qn = (d.problems || []).length;
   const box = d.forum_sites || [], out = [];
   const ev = k => counts[k] ? `AI cited it in ${counts[k]} of ${n} answers` : "";
-  if (threadHits || counts.reddit) out.push({ name: "Reddit", why: "Threads where buyers ask the questions you listed. Your kit searches the communities you found, including local ones.",
+  if (threadHits || counts.reddit) out.push({ name: "Reddit", why: "Threads where buyers ask your questions, including local communities.",
     tags: [threadHits ? `Buyer threads in ${threadHits} of ${qn} searches` : "", ev("reddit")].filter(Boolean), score: threadHits + (counts.reddit || 0) });
-  if (counts.youtube) out.push({ name: "YouTube", why: "Comments on review and how-to videos in your category. That's where buyers ask the follow-up questions.", tags: [ev("youtube")], score: counts.youtube });
-  if (counts.reviews) out.push({ name: "Review sites", why: "Google reviews, plus Yelp, Angi or Trustpilot depending on what you sell. Three-star reviews are where people explain what almost worked.", tags: [ev("reviews")], score: counts.reviews });
-  if (counts.forums || box.includes("Quora") || box.includes("A niche forum")) out.push({ name: "Quora and niche forums", why: "Answers and threads outside Reddit. Note which questions get the most answers and whether anyone mentions you.",
+  if (counts.youtube) out.push({ name: "YouTube", why: "Comments on review and how-to videos, where buyers ask follow-up questions.", tags: [ev("youtube")], score: counts.youtube });
+  if (counts.reviews) out.push({ name: "Review sites", why: "Three-star reviews, where people explain what almost worked.", tags: [ev("reviews")], score: counts.reviews });
+  if (counts.forums || box.includes("Quora") || box.includes("A niche forum")) out.push({ name: "Quora and niche forums", why: "Answers outside Reddit, and whether anyone mentions you.",
     tags: [counts.forums ? ev("forums") : "", box.includes("Quora") || box.includes("A niche forum") ? "In Google's forums box" : ""].filter(Boolean), score: (counts.forums || 0) + 1 });
-  if (counts.articles) out.push({ name: "Comparison articles", why: "The \"best of\" and comparison articles AI cites. Read what they say about you and your competitors, and note which ones leave you out.", tags: [ev("articles")], score: counts.articles });
-  if (counts.news) out.push({ name: "News coverage", why: "Local and industry stories AI pulls from. Note which outlets cover your category and whether they mention you.", tags: [ev("news")], score: counts.news });
+  if (counts.articles) out.push({ name: "Comparison articles", why: "The \"best of\" lists AI cites, and which ones leave you out.", tags: [ev("articles")], score: counts.articles });
+  if (counts.news) out.push({ name: "News coverage", why: "Local and industry outlets AI pulls from, and whether they mention you.", tags: [ev("news")], score: counts.news });
   return out.sort((a, b) => b.score - a.score);
 }
 const sourcesFor = (market, route) => [...(route !== "elsewhere" ? [REDDIT_SRC] : []), ...(market !== "b2c" ? B2B : []), ...(market !== "b2b" ? B2C : [])];
@@ -1147,7 +1129,7 @@ function kitSteps(d) {
   return [
     `Download the kit and drop it in a shared folder (Google Drive works) called "${d.company || "Your company"} audience research."`,
     "Decide who's running the searches. If it's not you, share the folder with edit access and send them the message on the Start here tab.",
-    "In the Searches tab, click the link in each row. It opens the search for you, so there's no need to go to Reddit or anywhere else first. When a thread or post shows someone buying, researching or comparing, copy it into the Capture tab with the link, the full text and every comment, plus the upvote or comment count and the search ID.",
+    "In the Searches tab, click the link in each row. It opens the search for you, so there's no need to go to Reddit or anywhere else first. When a thread or post shows someone buying, researching or comparing, copy it into the Capture tab with the link, the full text and every comment, plus the search ID.",
     "Mark the search done when you're finished, even if nothing was worth keeping.",
     `When every search is done, leave the finished file in the folder. ${PARSE_SKILL.charAt(0).toUpperCase() + PARSE_SKILL.slice(1)} reads it and pulls out the questions, phrases and sources your buyers use.`,
     "The audience data informs the set of prompts you should audit.",
@@ -1156,7 +1138,7 @@ function kitSteps(d) {
 function vaMessage(d) {
   return `Hi! I've got a research project for you. We're collecting the real conversations our buyers have about ${d.category}${d.place ? " in " + d.place : ""} so we know what they ask, compare and worry about. Our buyers include ${d.segments.map(g => g.label).join(", ")}, and the Searches tab notes which one each search is for.
 
-Every search is ready to go in the Searches tab. Click the link in each row (it runs the search for you), then open the threads or posts where someone is buying, researching or comparing, like asking for recommendations, weighing options or describing a problem. Paste the link, the full post with all of its comments and the upvote or comment count into the Capture tab, one row per thread, and add the search ID so we know where it came from. Please don't summarize or trim the comments. They're the most valuable part. Open every reply first, then press Cmd+A and Cmd+C on a Mac (Ctrl+A and Ctrl+C on a PC) and paste the whole page in.
+Every search is ready to go in the Searches tab. Click the link in each row (it runs the search for you), then open the threads or posts where someone is buying, researching or comparing, like asking for recommendations, weighing options or describing a problem. Paste the link and the full post with all of its comments into the Capture tab, one row per thread, and add the search ID so we know where it came from. Please don't summarize or trim the comments. They're the most valuable part. Open every reply first, then press Cmd+A and Cmd+C on a Mac (Ctrl+A and Ctrl+C on a PC) and paste the whole page in.
 
 Mark each search done when you finish it, even if it turned up nothing worth keeping. When you're done, put the finished file in our shared folder and let me know. Thank you!`;
 }
@@ -1170,8 +1152,8 @@ function buildKit(d) {
   const ws2 = XLSX.utils.aoa_to_sheet([["search_id", "who", "buyer question", "run this search", "what you're looking for", "search text (backup if the link doesn't open)", "done"], ...sRows.map(r => [r[0], r[1], r[2], "Open search ↗", r[4], r[5], r[6]])]);
   sRows.forEach((r, i) => { const ref = XLSX.utils.encode_cell({ r: i + 1, c: 3 }); ws2[ref].l = { Target: r[3] }; });
   ws2["!cols"] = [{ wch: 10 }, { wch: 28 }, { wch: 34 }, { wch: 15 }, { wch: 44 }, { wch: 50 }, { wch: 8 }];
-  const ws3 = XLSX.utils.aoa_to_sheet([["source_url", "captured_text (full post + all comments)", "engagement (upvotes / comments)", "search_id"]]);
-  ws3["!cols"] = [{ wch: 45 }, { wch: 90 }, { wch: 22 }, { wch: 10 }];
+  const ws3 = XLSX.utils.aoa_to_sheet([["source_url", "captured_text (full post + all comments)", "search_id"]]);
+  ws3["!cols"] = [{ wch: 45 }, { wch: 90 }, { wch: 10 }];
   XLSX.utils.book_append_sheet(wb, ws1, "Start here");
   XLSX.utils.book_append_sheet(wb, ws2, "Searches");
   XLSX.utils.book_append_sheet(wb, ws3, "Capture");
@@ -1302,7 +1284,7 @@ $("betaForm").addEventListener("submit", async e => {
 
 function renderResult(d) {
   $("rHello").textContent = `${d.name.split(" ")[0]}, here's what your checks showed`;
-  $("rBody").textContent = `Built from your ${d.problems.length} buyer questions and ${d.segments.length} persona${d.segments.length === 1 ? "" : "s"}. The sources at the top of the list are where your checks found the most activity, so start there.`;
+  $("rBody").textContent = `Built from your ${d.problems.length} buyer questions and ${d.segments.length} persona${d.segments.length === 1 ? "" : "s"}. Start with the sources at the top of the list.`;
   const counts = aiCounts(d), n = (d.ai_sources_by_question || []).length;
   const hits = (d.threads || []).filter(t => t === "1-2" || t === "3+").length, qn = d.problems.length;
   const strong = hits * 2 >= qn, aiR = !!counts.reddit, local = subs(d.community_local)[0];
@@ -1312,6 +1294,7 @@ function renderResult(d) {
     : hits ? "A few buyer threads turned up. Capture them, but don't build the whole plan around Reddit."
     : aiR ? "You didn't find buyer threads, but AI still cited Reddit for your questions. Conversations about your category are shaping those answers, even if your buyers aren't the ones posting."
     : "Reddit didn't come up for your buyers or for AI, so spend your time on the sources below.";
+  $("rVerdict").textContent = r;
   $("fReddit").textContent = r + (local ? ` Local subreddits like r/${local} came up too, and your kit searches inside them, since that's where people ask their neighbors for recommendations.` : "");
   const q1 = d.problems[0];
   $("fForums").textContent = d.forums_block === "yes"
@@ -1338,11 +1321,6 @@ function renderResult(d) {
     div.append(t, p); $("rSources").append(div);
   });
   if (!wl.length) $("rSources").innerHTML = '<p class="muted" style="margin:0">Your checks didn\'t point to one clear source yet. Start with the Reddit searches in your kit, since they\'re built from your exact questions.</p>';
-  $("kitSteps").innerHTML = "";
-  const escH = t => t.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  kitSteps(d).forEach((s, i, all) => { const li = document.createElement("li");
-    li.innerHTML = escH(s).replace(/(Start here|Searches|Capture) tab/g, '<span class="tabname">$1</span> tab');
-    if (i === all.length - 1) li.className = "next"; $("kitSteps").append(li); });
   $("kitCount").textContent = `All ${searchesFor(d).length} searches, ready to run. Click the link in each row and mark it done when you're finished.`;
   $("offerSpots").textContent = BETA_SPOTS ? `Beta testing limited to ${BETA_SPOTS} members` : "Beta spots are limited";
   $("pricePill").innerHTML = FULL_PRICE ? `<s>${FULL_PRICE}</s> <b>${FOUNDING_PRICE}</b>` : "Pricing at launch";

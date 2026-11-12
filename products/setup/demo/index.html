@@ -1392,7 +1392,7 @@ window.addEventListener("load", () => setTimeout(async () => {
   set("category", "roof replacement"); set("place", "Denver");
   ["how long does a roof replacement take", "will insurance cover hail damage", "metal roof vs asphalt shingles", "who fixes a roof leak fast for a rental", "how much does a new roof cost"].forEach((q, i) => set("problem" + i, q));
   const who = ["0", "1", "0", "2", ""]; who.forEach((v, i) => { const s = $("seg" + i); if (s) { s.value = v; s.dispatchEvent(new Event("change", { bubbles: true })); } });
-  ["1-2", "none", "3+", "none", "1-2"].forEach((v, i) => pick("threads" + i, v));
+  ["3+", "3+", "3+", "3+", "3+"].forEach((v, i) => pick("threads" + i, v));
   set("community_found", "r/Roofing, r/HomeImprovement"); set("community_local", "r/Denver");
   pick("forums_block", "yes"); pick("forum_sites", "Reddit"); pick("forum_sites", "Quora");
   set("goal", "Figure out where homeowners research roofers before they call anyone");

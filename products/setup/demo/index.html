@@ -1404,10 +1404,14 @@ window.addEventListener("load", () => setTimeout(async () => {
   }
   panes.forEach((p, i) => { const o = document.createElement("option"); o.value = i; o.textContent = `${i + 1}. ${p.querySelector("h2")?.textContent.replace(/\s+/g, " ").trim()}`; $("thStep").append(o); });
   { const o = document.createElement("option"); o.value = "result"; o.textContent = `${panes.length + 1}. Result page`; $("thStep").append(o); }
+  // Sample AI sources; any question left unticked on the AI step gets these when Continue is pressed,
+  // so one question can be checked live in a session and the rest fill in.
+  const picks = [["youtube", "reviews"], ["youtube", "reddit"], ["articles"], ["reddit"], ["youtube", "reviews", "articles"]];
+  const fillAi = () => picks.forEach((list, i) => { if (!document.querySelector(`input[name="ais${i}"]:checked`)) list.forEach(v => pick("ais" + i, v)); });
+  $("nextBtn").addEventListener("click", () => { if (panes[cur()]?.dataset.pane === "ai") fillAi(); }, true);
   async function toResult() {
     const ai = panes.findIndex(p => p.dataset.pane === "ai"); await go(ai);
-    const picks = [["youtube", "reviews"], ["youtube", "reddit"], ["articles"], ["reddit"], ["youtube", "reviews", "articles"]];
-    picks.forEach((list, i) => list.forEach(v => pick("ais" + i, v)));
+    fillAi();
     await go(panes.length - 1); $("nextBtn").click();
   }
   $("thGo").addEventListener("click", () => $("thStep").value === "result" ? toResult() : go(Number($("thStep").value)));

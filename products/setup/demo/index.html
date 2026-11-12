@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Corpuswave AI Visibility Setup</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1366,12 +1366,12 @@ const NEWS_DONE = "You're on the list for Corpuswave guides and announcements, i
   #testHelper button { cursor: pointer; background: #dc7d5c; border-color: #dc7d5c; color: #1b1814; font-weight: 600; }
   #testHelper p { margin: 6px 0 0; color: #b3a795; font-size: 11.5px; }
 </style>
-<div id="testHelper" role="region" aria-label="Test helper">
-  <b>Test helper</b>
-  Everything is prefilled with the roofing test answers.
+<div id="testHelper" role="region" aria-label="Demo helper">
+  <b>Demo helper</b>
+  Everything is prefilled with sample answers for Sloan's Lake Roofing.
   <select id="thStep" aria-label="Jump to step"></select>
   <button type="button" id="thGo">Go to step</button>
-  <p>Only in this test copy.</p>
+  <p>Only in this demo.</p>
 </div>
 <script>
 window.addEventListener("load", () => setTimeout(async () => {
@@ -1382,7 +1382,7 @@ window.addEventListener("load", () => setTimeout(async () => {
   const cur = () => panes.findIndex(p => !p.hidden);
   // Fill everything
   $("startBtn").click(); await wait(50);
-  set("name", "Test Roofing Marketing"); set("company", "Test Roofing Co"); set("website", "testroofing.com");
+  set("name", "Maya Castillo"); set("company", "Sloan's Lake Roofing Co"); set("website", "sloanslakeroofing.com");
   $("role").value = "Content manager"; $("role").dispatchEvent(new Event("change", { bubbles: true }));
   set("sells", "Residential roof replacement and repair");
   $("addB2C") && $("b2cRows").children.length < 3 && $("addB2C").click();
@@ -1396,7 +1396,7 @@ window.addEventListener("load", () => setTimeout(async () => {
   set("community_found", "r/Roofing, r/HomeImprovement"); set("community_local", "r/Denver");
   pick("forums_block", "yes"); pick("forum_sites", "Reddit"); pick("forum_sites", "Quora");
   set("goal", "Figure out where homeowners research roofers before they call anyone");
-  set("email", "test@example.com"); $("consent").checked = true;
+  set("email", "maya@sloanslakeroofing.com"); $("consent").checked = true;
   // Jump helper: walk forward/back through the real buttons so every screen's setup runs
   async function go(target) {
     for (let n = 0; n < 30 && cur() !== target; n++) { (cur() < target ? $("nextBtn") : $("backBtn")).click(); await wait(30); }

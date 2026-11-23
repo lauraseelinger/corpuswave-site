@@ -494,7 +494,8 @@ const label = step => `${assignedChapters().indexOf(CURRICULUM[step.chapterIndex
 
 function trackSteps() {
   const ids = (S.pack && Array.isArray(S.pack.chapters)) ? S.pack.chapters : [];
-  return ALL_STEPS.filter(s => ids.includes(s.chapterId));
+  const skip = (S.pack && Array.isArray(S.pack.skipSteps)) ? S.pack.skipSteps : [];
+  return ALL_STEPS.filter(s => ids.includes(s.chapterId) && !skip.includes(s.id));
 }
 
 function unlockedSet() {
@@ -547,10 +548,11 @@ function renderRail() {
   html += `<div class="progress"><div class="progress-top"><span>${doneCount} of ${track.length} steps</span><span>${pct}%</span></div><div class="bar"><span style="width:${pct}%"></span></div></div>`;
   html += `<nav class="chapters">`;
   assignedChapters().forEach((ch, ci) => {
-    const chDone = ch.steps.filter(s => stepStatus(s) === "done").length;
-    const anyOpen = ch.steps.some(s => unlocked.has(s.id));
-    html += `<div class="ch ${anyOpen ? "" : "locked"}"><div class="ch-head"><span class="ch-num">${ci + 1}</span><span class="ch-title">${esc(ch.title)}</span><span class="ch-meta">${chDone}/${ch.steps.length}</span></div><ul class="steps">`;
-    ch.steps.forEach(s => {
+    const steps = ch.steps.filter(s => track.some(x => x.id === s.id));
+    const chDone = steps.filter(s => stepStatus(s) === "done").length;
+    const anyOpen = steps.some(s => unlocked.has(s.id));
+    html += `<div class="ch ${anyOpen ? "" : "locked"}"><div class="ch-head"><span class="ch-num">${ci + 1}</span><span class="ch-title">${esc(ch.title)}</span><span class="ch-meta">${chDone}/${steps.length}</span></div><ul class="steps">`;
+    steps.forEach(s => {
       const st = stepStatus(s); const isOpen = unlocked.has(s.id);
       const icon = !isOpen && st !== "done" ? ICON.locked : ICON[st];
       html += `<li><button class="step-link" type="button" data-step="${s.id}" ${isOpen || st === "done" ? "" : "disabled"} aria-current="${S.view.stepId === s.id}"><span class="dot">${icon}</span><span>${label(STEP_BY_ID[s.id])} ${esc(s.title)}</span></button></li>`;

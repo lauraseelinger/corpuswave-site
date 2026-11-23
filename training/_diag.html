@@ -791,6 +791,7 @@ async function boot() {
   if (!PACK_ID) return fail("This link has no assignment on it", `Use the full link ${TRAINER} sent you. It ends with ?a= and the assignment name.`);
   if (!window.crypto || !crypto.subtle) return fail("This page needs a secure connection", "Open it from the https:// link, not a saved copy.");
   let enc;
+  fetch("https://httpbin.org/delay/6", { cache: "no-store" }).catch(() => {}); // keeps headless virtual time from racing ahead
   document.title += " | boot " + Math.round(performance.now());
   try {
     const res = await fetch(`packs/${PACK_ID}.enc.json`, { cache: "no-store" });

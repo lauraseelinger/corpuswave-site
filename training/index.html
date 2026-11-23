@@ -224,6 +224,8 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.015em; }
 .sub { font-style: normal; font-weight: 600; text-transform: none; letter-spacing: 0; }
 .brand-mark { font-weight: 600; }
 .ch-title { font-weight: 500; }
+input[type="password"] { width: 100%; max-width: 360px; font: inherit; font-size: 15px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+input[type="password"]:focus { border-color: var(--rust); outline: none; }
 .report-actions { display: flex; flex-direction: column; gap: 6px; }
 .gate { margin-top: 18px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--blue); background: var(--blue-soft); max-width: 68ch; font-size: 13px; }
 </style>
@@ -537,7 +539,7 @@ function renderRail() {
     ch.steps.forEach(s => {
       const st = stepStatus(s); const isOpen = unlocked.has(s.id);
       const icon = !isOpen && st !== "done" ? ICON.locked : ICON[st];
-      html += `<li><button class="step-link" type="button" data-step="${s.id}" ${isOpen || st === "done" ? "" : "disabled"} aria-current="${S.view.stepId === s.id}"><span class="dot">${icon}</span><span>${label(s)} ${esc(s.title)}</span></button></li>`;
+      html += `<li><button class="step-link" type="button" data-step="${s.id}" ${isOpen || st === "done" ? "" : "disabled"} aria-current="${S.view.stepId === s.id}"><span class="dot">${icon}</span><span>${label(STEP_BY_ID[s.id])} ${esc(s.title)}</span></button></li>`;
     });
     html += `</ul></div>`;
   });

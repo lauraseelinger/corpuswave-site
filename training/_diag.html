@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>diag</title>
+<style>
+/* Layout: brand bar, then a chapter rail beside one step at a time (rail stacks above the step on phones). */
+:root {
+  --bg: #fcf5e5;
+  --surface: #fffaf0;
+  --surface-2: #faeccd;
+  --ink: #2a2420;
+  --muted: #6c6157;
+  --line: #e6d7b8;
+  --rust: #b55434;
+  --rust-ink: #ffffff;
+  --blue: #a3bbc3;
+  --blue-soft: #e4ecee;
+  --olive: #6f7036;
+  --olive-soft: #ecedd6;
+  --warn: #9a5b12;
+  --warn-soft: #f8e6c8;
+  --font-head: "Literata", "Source Serif 4", Georgia, serif;
+  --font-sub: "Besley", "Zilla Slab", Georgia, serif;
+  --font-body: "Geist Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1814; --surface: #24201b; --surface-2: #2e2821; --ink: #f2e9d8; --muted: #b3a795;
+    --line: #3d352c; --rust: #dc7d5c; --rust-ink: #1b1814; --blue: #a3bbc3; --blue-soft: #263236;
+    --olive: #bfc07a; --olive-soft: #2d2e1d; --warn: #f0b867; --warn-soft: #3a2c17; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1814; --surface: #24201b; --surface-2: #2e2821; --ink: #f2e9d8; --muted: #b3a795;
+  --line: #3d352c; --rust: #dc7d5c; --rust-ink: #1b1814; --blue: #a3bbc3; --blue-soft: #263236;
+  --olive: #bfc07a; --olive-soft: #2d2e1d; --warn: #f0b867; --warn-soft: #3a2c17; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.65; font-weight: 400; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3 { font-family: var(--font-head); font-weight: 300; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+.sub { font-family: var(--font-sub); font-style: italic; font-weight: 800; text-transform: lowercase; letter-spacing: 0.01em; }
+a { color: var(--rust); }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
+
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.topbar-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
+.brand-mark { font-family: var(--font-head); font-size: 20px; font-weight: 400; }
+.brand-mark b { color: var(--rust); font-weight: 400; }
+.brand .sub { color: var(--muted); font-size: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: var(--surface); white-space: nowrap; }
+.chip.ok { color: var(--olive); border-color: var(--olive); }
+.chip.warn { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { background: transparent; border: 0; padding: 6px 12px; color: var(--muted); font-size: 12.5px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px; background: var(--rust); color: var(--rust-ink); font-size: 11px; line-height: 18px; text-align: center; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+.notice { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 13px; }
+.notice.warn { border-color: var(--warn); background: var(--warn-soft); }
+.notice.info { border-color: var(--blue); background: var(--blue-soft); }
+.notice strong { font-weight: 600; }
+
+/* Rail */
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 70px); display: flex; flex-direction: column; gap: 14px; }
+@media (max-width: 860px) { .rail { position: static; } }
+.progress { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.progress-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { height: 6px; background: var(--surface-2); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--rust); border-radius: 3px; transition: width .3s; }
+.chapters { display: flex; flex-direction: column; gap: 4px; }
+.ch { border-radius: 10px; }
+.ch-head { display: flex; gap: 10px; align-items: baseline; padding: 8px 10px; width: 100%; text-align: left; background: transparent; border: 0; color: var(--ink); border-radius: 8px; }
+.ch-head:hover { background: var(--surface-2); }
+.ch-num { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 22px; }
+.ch-title { font-family: var(--font-head); font-size: 16px; line-height: 1.3; }
+.ch.locked .ch-title, .ch.unassigned .ch-title { color: var(--muted); }
+.ch-meta { margin-left: auto; font-size: 11px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.steps { list-style: none; margin: 0 0 6px 32px; padding: 0; border-left: 1px solid var(--line); }
+.step-link { display: flex; gap: 8px; align-items: center; width: 100%; padding: 5px 10px; background: transparent; border: 0; text-align: left; color: var(--ink); font-size: 12.5px; border-radius: 0 6px 6px 0; }
+.step-link:hover:not([disabled]) { background: var(--surface-2); }
+.step-link[aria-current="true"] { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--rust); }
+.step-link[disabled] { color: var(--muted); cursor: not-allowed; }
+.dot { width: 14px; height: 14px; flex: none; display: inline-grid; place-items: center; }
+.dot svg { width: 14px; height: 14px; }
+.future { margin-top: 6px; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; font-size: 12px; color: var(--muted); }
+.future .sub { color: var(--muted); font-size: 13px; }
+
+/* Step */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 26px clamp(18px, 3vw, 34px); min-width: 0; }
+.eyebrow { font-size: 12px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.step-title { font-size: clamp(26px, 3.4vw, 34px); margin-top: 6px; }
+.prose { max-width: 68ch; margin-top: 16px; }
+.prose p { margin: 0 0 12px; }
+.prose ul, .prose ol { margin: 0 0 12px; padding-left: 20px; }
+.prose li { margin-bottom: 6px; }
+.prose dl { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 18px; }
+.prose dt { font-weight: 600; }
+.prose dd { margin: 0; }
+@media (max-width: 560px) { .prose dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } .prose dd { margin-bottom: 8px; } }
+.path { font-size: 12.5px; background: var(--surface-2); padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+.table-wrap { overflow-x: auto; margin: 4px 0 14px; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+.why { margin-top: 18px; max-width: 68ch; padding: 12px 14px; border-radius: 10px; background: var(--blue-soft); border: 1px solid var(--blue); font-size: 13px; }
+.why .sub { display: block; font-size: 14px; margin-bottom: 2px; }
+
+.block { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); max-width: 68ch; }
+.block-label { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.block-label .sub { font-size: 16px; color: var(--rust); }
+.block-label small { color: var(--muted); font-size: 11.5px; }
+.quiz-q { margin: 0 0 10px; font-weight: 500; }
+.opt { display: flex; gap: 10px; align-items: flex-start; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; cursor: pointer; background: var(--bg); }
+.opt:hover { border-color: var(--muted); }
+.opt input { margin-top: 4px; accent-color: var(--rust); }
+.opt.right { border-color: var(--olive); background: var(--olive-soft); }
+.opt.wrong { border-color: var(--warn); background: var(--warn-soft); }
+.feedback { font-size: 12.5px; margin-top: 6px; }
+.feedback.right { color: var(--olive); }
+.feedback.wrong { color: var(--warn); }
+.check { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; cursor: pointer; }
+.check input { margin-top: 5px; width: 16px; height: 16px; accent-color: var(--rust); flex: none; }
+textarea, select, input[type="text"], input[type="search"] { width: 100%; font: inherit; font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; }
+textarea { min-height: 84px; resize: vertical; }
+textarea:focus, input:focus { border-color: var(--rust); outline: none; }
+.saved-note { font-size: 11.5px; color: var(--muted); margin-top: 4px; min-height: 1em; }
+
+.actions { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn { border: 1px solid var(--ink); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 8px; font-size: 13px; }
+.btn.primary { background: var(--rust); border-color: var(--rust); color: var(--rust-ink); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.status { display: inline-flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 8px; font-size: 13px; }
+.status.done { background: var(--olive-soft); color: var(--olive); }
+.status.pending { background: var(--blue-soft); }
+.status.changes { background: var(--warn-soft); color: var(--warn); }
+.missing { font-size: 12px; color: var(--muted); }
+.nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+
+.locked-card { text-align: left; }
+.locked-card p { color: var(--muted); max-width: 60ch; }
+
+.assignment { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--rust); border-radius: 10px; padding: 12px 14px; font-size: 12.5px; }
+.assignment .sub { color: var(--rust); font-size: 14px; }
+.assignment pre { white-space: pre-wrap; font: inherit; margin: 6px 0 0; }
+
+/* Assignment pack: the client-specific list, table or projects shown inside a step */
+.block.wide { max-width: none; }
+.paste { min-height: 220px; font-size: 12.5px; }
+.pack-table td.n { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pack-table td.tick { width: 1%; }
+.pack-table td.tick input { width: 16px; height: 16px; accent-color: var(--rust); }
+.pack-table tr.ticked td:not(.tick) { color: var(--muted); }
+.tag { display: inline-block; font-size: 11.5px; padding: 0 7px; margin: 0 4px 2px 0; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); white-space: nowrap; }
+.count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Admin */
+.admin { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .admin { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+.panel h2 { font-size: 22px; margin-bottom: 4px; }
+.panel h3 { font-size: 18px; margin: 18px 0 8px; }
+.people { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.person { display: flex; gap: 10px; align-items: center; width: 100%; padding: 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; text-align: left; color: var(--ink); }
+.person:hover { background: var(--surface-2); }
+.person[aria-current="true"] { border-color: var(--rust); background: var(--surface-2); }
+.avatar { width: 28px; height: 28px; border-radius: 50%; flex: none; object-fit: cover; }
+.person-name { font-size: 13px; }
+.person-meta { font-size: 11px; color: var(--muted); }
+.search-results { list-style: none; padding: 0; margin: 6px 0 0; }
+.search-results button { width: 100%; text-align: left; background: transparent; border: 0; padding: 6px 8px; border-radius: 6px; color: var(--ink); display: flex; gap: 8px; align-items: center; }
+.search-results button:hover { background: var(--surface-2); }
+.assign-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 14px; }
+.review-item { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--bg); }
+.review-item .evidence { white-space: pre-wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; margin: 8px 0; font-size: 12.5px; }
+.review-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.review-actions input { flex: 1 1 220px; width: auto; }
+.prog-table td:first-child { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+.pill { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+.pill.done { color: var(--olive); border-color: var(--olive); }
+.pill.pending { border-color: var(--blue); background: var(--blue-soft); }
+.pill.changes { color: var(--warn); border-color: var(--warn); }
+.empty { color: var(--muted); font-size: 13px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Neutral theme: overrides the course's brand palette and fonts (same selectors, later in the file, so these win). */
+:root {
+  --bg: #f6f7f8; --surface: #ffffff; --surface-2: #eef0f3; --ink: #1f2328; --muted: #5d646d; --line: #dde1e6;
+  --rust: #2f5fa7; --rust-ink: #ffffff; --blue: #9fb6d3; --blue-soft: #edf3fa;
+  --olive: #2b7a4b; --olive-soft: #e7f3eb; --warn: #8a5a00; --warn-soft: #fbf1db;
+  --font-head: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sub: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16181b; --surface: #1e2125; --surface-2: #272b30; --ink: #e8eaed; --muted: #a2a9b2; --line: #343a41;
+    --rust: #82a9e6; --rust-ink: #16181b; --blue: #4d6a8f; --blue-soft: #1c2938;
+    --olive: #6fcf97; --olive-soft: #1a2d22; --warn: #e8b45a; --warn-soft: #33281a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16181b; --surface: #1e2125; --surface-2: #272b30; --ink: #e8eaed; --muted: #a2a9b2; --line: #343a41;
+  --rust: #82a9e6; --rust-ink: #16181b; --blue: #4d6a8f; --blue-soft: #1c2938;
+  --olive: #6fcf97; --olive-soft: #1a2d22; --warn: #e8b45a; --warn-soft: #33281a; color-scheme: dark;
+}
+body { margin: 0; font-size: 15px; }
+h1, h2, h3 { font-weight: 600; letter-spacing: -0.015em; }
+.sub { font-style: normal; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.brand-mark { font-weight: 600; }
+.ch-title { font-weight: 700; font-size: 15px; }
+.ch.locked .ch-title { color: var(--ink); }
+/* Sidebar: its own tinted panel so directions, progress and chapters read as one place to look. */
+:root { --rail-bg: #e1efe7; --rail-line: #bcd8c7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --rail-bg: #16261d; --rail-line: #2b4637; } }
+:root[data-theme="dark"] { --rail-bg: #16261d; --rail-line: #2b4637; }
+.rail { background: var(--rail-bg); border: 1px solid var(--rail-line); border-radius: 14px; padding: 14px; }
+.rail .assignment, .rail .progress { border-color: var(--rail-line); }
+.rail .step-link:hover:not([disabled]), .rail .ch-head:hover { background: var(--surface); }
+.rail .step-link[aria-current="true"] { background: var(--surface); }
+.rail .steps { border-left-color: var(--rail-line); }
+.rail .btn.ghost { background: var(--surface); border-color: var(--rail-line); }
+input[type="password"] { width: 100%; max-width: 360px; font: inherit; font-size: 15px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+input[type="password"]:focus { border-color: var(--rust); outline: none; }
+.shot { margin: 18px 0 0; max-width: 900px; }
+.shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.shot figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.report-actions { display: flex; flex-direction: column; gap: 6px; }
+.gate { margin-top: 18px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--blue); background: var(--blue-soft); max-width: 68ch; font-size: 13px; }
+</style>
+</head>
+<body>
+<!-- Standalone, unbranded build of the field training: no sign-in, one assignment per link (?a=<pack id> loads the encrypted packs/<id>.enc.json), progress kept in this browser, review by report. Generated by va-training/standalone/build.py; edit the source there, not here. -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-mark">Field Training</span><span class="sub">AI visibility setup</span></div>
+    <span id="modeChip" class="chip">Loading…</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="notices"></div>
+  <section id="learnView" class="layout">
+    <aside class="rail" id="rail" aria-label="Chapters"></aside>
+    <article class="card" id="stepCard" aria-live="polite"></article>
+  </section>
+</main>
+
+<script>
+(() => {
+"use strict";
+
+const TRAINER = "Laura";
+
+/* ---------- Curriculum ---------- */
+// Shared by the new-project and running-project chapters; only the step id differs.
+const COVERAGE_STEP = { title: "Read the coverage tab",
+  body: `<p>Open <span class="path">Manage → Prompts → Coverage</span>. This is the tab, not the Coverage section in the sidebar, which is about media placements.</p>
+<p>Screenshot the score and the matrix. The decision row matters most because those are buyers about to choose, so note how many decision cells show as gaps and any redundant prompt clusters it flags. Don't add prompts to raise the score. ${TRAINER} decides what gets added.</p>`,
+  checks: ["The coverage screenshot is saved"],
+  evidence: { label: "Coverage score and number of decision-stage gaps", placeholder: "Score 62, 4 decision gaps", required: true } };
+
+const CURRICULUM = [
+  { id: "orient", title: "How AI visibility tracking works", summary: "What Spyglasses measures and the rules we work by.", steps: [
+    { id: "1.1", title: "What we're actually measuring",
+      body: `<p>When someone asks ChatGPT or Gemini for a recommendation, the answer names some brands and skips others. Spyglasses asks the same set of questions every night and records who gets named, which websites get cited and what the engine searched for before it answered.</p>
+<p>Setup is where we make sure those questions are the right ones and the brand's profile is accurate.</p>`,
+      why: "A tracking setup with the wrong questions still produces clean, confident charts. Nobody can tell from the chart that it's measuring the wrong thing, which is why we're careful here.",
+      quiz: { q: "Which engines does Spyglasses track every night on every plan?", options: ["ChatGPT, Claude and Perplexity", "ChatGPT, Gemini and Google AI Overviews", "All seven engines we test by hand"], answer: 1,
+        explain: "Claude is available by request and Perplexity is a paid add-on. That gap is one reason we still run some prompts by hand." } },
+    { id: "1.2", title: "The words you'll see",
+      body: `<dl>
+<dt>Property</dt><dd>One brand or website being tracked. Each client gets its own.</dd>
+<dt>Brand snapshot</dt><dd>Spyglasses' profile of the brand, built by reading the website. It shapes the suggestions Spyglasses makes later.</dd>
+<dt>Prompt</dt><dd>One question we ask the AI engines, written the way a real buyer would type it.</dd>
+<dt>Prompt type</dt><dd>The kind of question (a comparison, a "best for" list, a question about the brand). The type sets the buyer stage.</dd>
+<dt>Buyer stage</dt><dd>Awareness, consideration or decision. Decision questions come from people about to choose.</dd>
+<dt>Share of voice</dt><dd>How often the brand is named compared with competitors across all the answers.</dd>
+<dt>Key message</dt><dd>An idea the client wants AI to repeat. We track whether answers carry it.</dd>
+<dt>Citation</dt><dd>A website an AI answer links to as a source.</dd>
+<dt>Grounding search</dt><dd>The search an engine runs in the background before it writes the answer.</dd>
+<dt>Project</dt><dd>The container that makes prompts run every night. No project, no data.</dd>
+</dl>`,
+      quiz: { q: "What is a grounding search?", options: ["A keyword the client wants to rank for", "The search an AI engine runs in the background before it writes its answer", "A Google search you run to check the client's site"], answer: 1,
+        explain: "Grounding searches never show up in keyword tools, and they decide which pages an engine can cite at all." } },
+    { id: "1.3", title: "Three ground rules",
+      body: `<ol>
+<li><strong>Never fill a field with a guess.</strong> That covers prompts, competitors, proof points and numbers. Blank is a valid answer.</li>
+<li><strong>Screenshot before you change anything.</strong> The before picture is part of the client's baseline and can't be recreated later.</li>
+<li><strong>When something looks off, flag it.</strong> A strange result is often the finding, so tell ${TRAINER} instead of quietly fixing it.</li>
+</ol>`,
+      checks: ["I'll leave a field blank rather than guess", "I'll screenshot before I change anything", "I'll flag anything odd instead of fixing it quietly"],
+      quiz: { q: "The snapshot lists an award you can't find anywhere on the client's site. What do you do?", options: ["Leave it, the crawl must have found it somewhere", "Flag it and don't add it to proof points", "Search Google and add the closest match"], answer: 1,
+        explain: "Anything we can't trace to the client's own site stays out until it's confirmed." } },
+  ]},
+  { id: "snapshot", title: "Property and brand snapshot", summary: "Confirm you're in the right place, then audit the profile.", steps: [
+    { id: "2.1", title: "Make sure you're in the right property",
+      body: `<p>The top left of Spyglasses has two switchers, one for the organization and one for the property. One account holds many clients, and editing the wrong one is the easiest mistake to make here. Confirm both match your assignment before you touch anything.</p>
+<p>Then open <span class="path">Settings → General</span> and check prospect mode. Turn it on only if your assignment says so. Prospect mode hides the property from the normal list, and the way back is the Clients and Prospects toggle on the organization dashboard.</p>`,
+      checks: ["The organization matches my assignment", "The property domain matches my assignment", "Prospect mode is set the way my assignment says"],
+      evidence: { label: "Property domain you're working in", placeholder: "example.com", required: true } },
+    { id: "2.2", title: "Read the build date and screenshot every field",
+      body: `<p>Open <span class="path">Manage → Brand snapshot</span>. The header says when the snapshot was built from the website. Write that date down.</p>
+<p>Then screenshot every field before changing anything and save the screenshots in the client folder.</p>`,
+      why: "The snapshot feeds the coverage matrix and the prompts Spyglasses suggests. An outdated snapshot points every later recommendation at positioning the client may have dropped.",
+      checks: ["Screenshots of every field are saved in the client folder"],
+      evidence: { label: "Snapshot build date", placeholder: "e.g. Nov 7 2026", required: true } },
+    { id: "2.3", title: "Audit the fields", review: true,
+      body: `<p>Compare each field with the client's live website and your assignment notes. Don't edit yet. List what you'd change and ${TRAINER} will approve it first.</p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>What to check</th></tr></thead><tbody>
+<tr><td>Name</td><td>The exact brand name, not a tagline or a page title</td></tr>
+<tr><td>Category</td><td>What kind of business it is, in plain words</td></tr>
+<tr><td>Problems solved, features, differentiators</td><td>Matches current positioning, with nothing the client has dropped</td></tr>
+<tr><td>Pricing</td><td>Blank unless the site publishes prices</td></tr>
+<tr><td>Proof points</td><td>Only things you can find on the client's own site</td></tr>
+<tr><td>Anything strange</td><td>Another language, unrelated products or an old service can mean a site problem. Flag it.</td></tr>
+</tbody></table></div>`,
+      checks: ["I compared every field with the live site"],
+      evidence: { label: "Your flags: the field, what it says now, what you'd change and where you saw it", placeholder: "Category: says 'travel blog'. Should be 'boutique hotel group' (homepage headline).", required: true } },
+    { id: "2.4", title: "Make the approved edits",
+      body: `<p>If the build date is older than the client's current site, click <strong>Rebuild from crawl</strong> first and then edit. Edits stay in place through future re-crawls, so editing before a rebuild wastes the work.</p>
+<p>Make only the edits ${TRAINER} approved. Differentiators should use the same wording as the key messages in your assignment, so the two reinforce each other.</p>`,
+      checks: ["I rebuilt from crawl first if the snapshot was outdated", "I made only the approved edits", "A screenshot of the finished snapshot is saved"] },
+  ]},
+  { id: "prompts", title: "Prompts", summary: "Import the list, then give every prompt a type and tags.", steps: [
+    { id: "3.1", title: "Clear the default prompts",
+      body: `<p>New properties start with about five sample prompts Spyglasses wrote itself. Delete them so only the prompts from your assignment get tracked.</p>
+<p>If your assignment says the property is already set up, its prompts are real and being tracked. Delete nothing and move on.</p>`,
+      checks: ["The default prompts are deleted, or my assignment says the property is already set up and I deleted nothing"] },
+    { id: "3.2", title: "Import the prompt list", pack: "paste",
+      body: `<p>Go to <span class="path">Manage → Prompts</span> and click <strong>Import</strong>. Stay on the <strong>Paste</strong> tab and paste the list from your assignment exactly as it is, header row included. The list already carries each prompt's type and two tags in their own columns, so they come in with the prompts.</p>
+<p>Click <strong>Preview prompts</strong>. Before you import, check that the preview count matches your assignment and that every row shows a type and two tags. If anything is off, stop and send a note. If Spyglasses warns that a prompt is very similar to one already in the list, write down which one and tell ${TRAINER} instead of deciding yourself.</p>`,
+      checks: ["The preview count matched my assignment before I imported", "Every row in the preview had a type and two tags"],
+      evidence: { label: "Preview count / expected count", placeholder: "29 / 29", required: true } },
+    { id: "3.3", title: "Check the type on every prompt", pack: "types",
+      body: `<p>In the prompt list, each prompt's type shows in small text under the prompt, with the buyer stage beside it. Find each prompt from your assignment with the search box and compare its type with the sheet.</p>
+<p>If one is wrong, click the <strong>⋯</strong> at the end of its row, choose <strong>Edit</strong>, pick the right type under Prompt Type and click <strong>Update Prompt</strong>.</p>`,
+      checks: ["Every prompt's type matches the sheet"] },
+    { id: "3.4", title: "Check the tags on every prompt", pack: "tags",
+      body: `<p>The Tags column shows each prompt's tags. Compare them with the sheet. Spyglasses saves tags in lowercase, so capital letters don't matter.</p>
+<p>To fix one, open <strong>⋯ → Edit</strong>, remove the wrong tag with its ×, type the right one in Add a tag (or click it in the Existing list) and click <strong>Update Prompt</strong>. Leave Location and Context blank.</p>`,
+      checks: ["Every prompt has the two tags on the sheet", "Location and Context are blank"] },
+  ]},
+  { id: "locations", title: "Locations", summary: "Only for clients tied to specific places.", steps: [
+    { id: "4.1", title: "Add the cities",
+      body: `<p>For clients tied to places, Locations runs every prompt again from each city so we can compare share of voice market by market. Go to <span class="path">Locations → Add location</span> and add the cities from your assignment. Cities only, no counties.</p>
+<p>Don't set the Location field on individual prompts. That pins a prompt to one city and breaks the comparison.</p>`,
+      checks: ["Every city from my assignment is added", "No prompt has its own Location set"],
+      evidence: { label: "Cities added", placeholder: "Toledo, Perrysburg, Port Clinton", required: true } },
+  ]},
+  { id: "messages", title: "Key messages and competitors", summary: "What the client wants AI to say, and who they're measured against.", steps: [
+    { id: "5.1", title: "Add the key messages",
+      body: `<p>Key messages track whether the client's story shows up in answers before anyone asks about a brand by name. Go to <span class="path">Manage → Key Messages → Add</span> and enter them one at a time with the message, the sentiment and the description.</p>
+<p>The description arrives pre-filled with the message text. Overwrite it with the description from your assignment.</p>`,
+      quiz: { q: "Why overwrite the pre-filled description?", options: ["Spyglasses rejects duplicate text", "A description written the way an answer would phrase it catches paraphrases, while a copy of the message only catches the exact words", "It changes the sentiment score"], answer: 1,
+        explain: "AI rarely repeats a message word for word, so the description has to describe the idea." },
+      checks: ["Every key message from my assignment is added with its own description"],
+      evidence: { label: "How many key messages you added", placeholder: "8", required: true } },
+    { id: "5.2", title: "Competitors: only what you're given",
+      body: `<p>The competitor list drives the share of voice chart. Enter only the competitors in your assignment. If it says to leave the list empty, leave it empty and ${TRAINER} will fill it later from the brands AI actually names.</p>`,
+      why: "A guessed competitor puts a fake line on the client's chart, and it looks exactly as real as the true ones.",
+      checks: ["Competitors are entered exactly as assigned, or left empty as assigned"] },
+  ]},
+  { id: "projects", title: "Projects: turn on nightly tracking", summary: "Nothing runs until this chapter is done.", steps: [
+    { id: "6.1", title: "Build the page group",
+      body: `<p>Prompts only run nightly inside a project, and an SEO project needs a page group first. Go to <span class="path">Manage → Property Pages → Create page group</span> and add the pages from your assignment using path patterns.</p>
+<p>Only pages Spyglasses has crawled can be added. If one is missing, note it and keep going.</p>`,
+      checks: ["The page group is created with every page I could add"],
+      evidence: { label: "Pages you couldn't add (or “none”)", placeholder: "/live-web-cam/ not crawled", required: true } },
+    { id: "6.2", title: "Create the SEO project", review: true,
+      body: `<p>Go to <span class="path">Projects → New → SEO</span>. Attach the page group, select <strong>all</strong> prompts and save today.</p>
+<p>Don't use Auto-pick. It drops prompts to fill empty grid cells, and the prompts in your assignment were chosen on purpose.</p>`,
+      why: "Projects only collect data from the day they're created. Spyglasses doesn't backfill, so every day of delay is baseline the client never gets back.",
+      quiz: { q: "You imported prompts Monday and created the project Thursday. What did you lose?", options: ["Nothing, Spyglasses backfills", "Three nights of tracking data that can't be recovered", "Only Monday's screenshots"], answer: 1,
+        explain: "Same-day setup matters more than a perfect page group." },
+      checks: ["All prompts are selected", "I didn't use Auto-pick"],
+      evidence: { label: "Project name and the date you created it", placeholder: "Baseline SEO, Nov 8 2026", required: true } },
+    { id: "6.3", ...COVERAGE_STEP },
+  ]},
+  { id: "addto", title: "Add prompts to running projects", summary: "For properties that already track every night.", steps: [
+    { id: "7.1", title: "Add the new prompts to each project", review: true, pack: "projects",
+      body: `<p>Some properties already have projects running every night, and when yours does you add the new prompts to the projects listed in your assignment instead of creating a new one.</p>
+<p>Open each project from <span class="path">Projects</span>, go to its <span class="path">Prompts</span> tab and click <strong>Add prompts</strong> in the Tracked prompts box. Select only the new prompts from your assignment and leave every prompt that's already in the project. Spyglasses shows a warning that adding prompts changes the project's numbers from that day on. Continue past it, because adding to the running projects was decided on purpose.</p>
+<p>Don't use Auto-pick, and add the prompts to every project the same day you import them.</p>`,
+      why: "A prompt that's imported but never added to a project doesn't run, and nothing on the screen tells you it's missing.",
+      quiz: { q: "Spyglasses warns that adding prompts will affect the project's metrics. What do you do?", options: ["Stop and create a new project instead", "Continue, because the warning is expected when adding prompts to a running project", "Remove the old prompts first so the numbers stay clean"], answer: 1,
+        explain: "Adding to the running project was decided on purpose. Never remove a prompt that's already being tracked." },
+      checks: ["I added the new prompts to every project in my assignment", "I didn't remove or change any prompt that was already in a project", "I didn't use Auto-pick"],
+      evidence: { label: "Prompt count in each project after adding", placeholder: "Project one: 49. Project two: 49.", required: true } },
+    { id: "7.2", ...COVERAGE_STEP },
+  ]},
+  { id: "handoff", title: "Hand off", summary: "Wrap up and let the data collect.", steps: [
+    { id: "8.1", title: "Send your handoff", review: true,
+      body: `<p>Put your screenshots and notes in the client folder and mark this step complete. Spyglasses needs three to seven nights before the trends mean anything, so nobody reads results before then. ${TRAINER} will review the setup and let you know what's next.</p>`,
+      checks: ["Screenshots and notes are in the client folder"],
+      evidence: { label: "Anything " + TRAINER + " should know (or “nothing”)", placeholder: "Two pages weren't crawled yet. Everything else is in.", required: true } },
+  ]},
+];
+
+// This page trains data entry, so it drops the course's explainer boxes and quizzes.
+CURRICULUM.forEach(ch => ch.steps.forEach(s => { delete s.why; delete s.quiz; }));
+
+const ALL_STEPS = [];
+CURRICULUM.forEach((ch, ci) => ch.steps.forEach((s, si) => ALL_STEPS.push({ ...s, chapterId: ch.id, chapterIndex: ci, stepIndex: si })));
+const STEP_BY_ID = Object.fromEntries(ALL_STEPS.map(s => [s.id, s]));
+
+/* ---------- State ---------- */
+const PACK_ID = (new URLSearchParams(location.search).get("a") || "").replace(/[^a-z0-9-]/gi, "");
+const STORE_KEY = "field-training-" + PACK_ID;
+const S = {
+  pack: null,               // {title, property, brief, chapters, gates, prompts in on-screen order, projects}
+  progress: { name: "", steps: {} },
+  view: { stepId: null },
+  storageOk: true,
+};
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nowIso = () => new Date().toISOString();
+const fmtDate = iso => { try { return new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); } catch { return ""; } };
+const ICON = {
+  done: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="var(--olive)"/><path d="M4.8 8.3l2.1 2.1 4.3-4.6" fill="none" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  pending: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.6"/><path d="M8 4.8V8l2 1.4" fill="none" stroke="var(--ink)" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  open: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="var(--rust)" stroke-width="1.6"/></svg>',
+  locked: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" fill="none" stroke="var(--muted)" stroke-width="1.4"/><path d="M5.5 7V5.3a2.5 2.5 0 015 0V7" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg>',
+};
+
+function stepRec(stepId) { return (S.progress.steps && S.progress.steps[stepId]) || {}; }
+const isGate = step => !!(S.pack && Array.isArray(S.pack.gates) && S.pack.gates.includes(step.id));
+
+/* Status of one step: open | pending (finished, waiting for Laura's okay) | done */
+function stepStatus(step) {
+  const r = stepRec(step.id);
+  if (!r.done) return "open";
+  if (isGate(step) && !r.okayed) return "pending";
+  return "done";
+}
+
+const packPrompts = () => (S.pack && Array.isArray(S.pack.prompts)) ? S.pack.prompts : [];
+function packRowsLeft(step, rec) {
+  if (step.pack !== "types" && step.pack !== "tags") return 0;
+  const rows = rec.rows || [];
+  return packPrompts().filter((_, i) => !rows[i]).length;
+}
+
+function readyToComplete(step, rec) {
+  const checks = step.checks || [];
+  if (checks.some((_, i) => !(rec.checks && rec.checks[i]))) return false;
+  if (step.quiz && rec.quiz !== step.quiz.answer) return false;
+  if (step.evidence && step.evidence.required && !(rec.evidence || "").trim()) return false;
+  if (packRowsLeft(step, rec) > 0) return false;
+  return true;
+}
+
+// Chapters are numbered in the order this assignment uses them, not their place in the full course.
+const assignedChapters = () => CURRICULUM.filter(ch => S.pack && S.pack.chapters.includes(ch.id));
+
+// What the VA sees as the step number (chapter in this assignment . step); ids stay fixed for the report data.
+const label = step => `${assignedChapters().indexOf(CURRICULUM[step.chapterIndex]) + 1}.${step.stepIndex + 1}`;
+
+function trackSteps() {
+  const ids = (S.pack && Array.isArray(S.pack.chapters)) ? S.pack.chapters : [];
+  const skip = (S.pack && Array.isArray(S.pack.skipSteps)) ? S.pack.skipSteps : [];
+  return ALL_STEPS.filter(s => ids.includes(s.chapterId) && !skip.includes(s.id));
+}
+
+function unlockedSet() {
+  const open = new Set();
+  for (const s of trackSteps()) { open.add(s.id); if (stepStatus(s) !== "done") break; }
+  return open;
+}
+
+/* ---------- Persistence (this browser only) ---------- */
+function load() {
+  try { const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (saved && saved.steps) S.progress = saved; }
+  catch { S.storageOk = false; }
+}
+function save() {
+  S.progress.updatedAt = nowIso();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(S.progress)); S.storageOk = true; }
+  catch { S.storageOk = false; renderChrome(); }
+  const el = document.querySelector(".saved-note"); if (el && S.storageOk) el.textContent = "Saved in this browser";
+}
+let evidenceTimer = null;
+
+function setRec(stepId, patch, persist = true) {
+  const steps = { ...(S.progress.steps || {}) };
+  steps[stepId] = { ...(steps[stepId] || {}), ...patch };
+  S.progress = { ...S.progress, steps };
+  if (persist) { clearTimeout(evidenceTimer); save(); }
+  renderRail();
+}
+
+/* ---------- Chrome ---------- */
+function renderChrome() {
+  const chip = $("modeChip");
+  chip.className = S.storageOk ? "chip ok" : "chip warn";
+  chip.textContent = S.storageOk ? "Saved in this browser" : "Not saving";
+  const n = [];
+  if (!S.storageOk) n.push(`<div class="notice warn"><strong>This browser isn't letting the page save your progress.</strong> A private window does this. Open the link in a normal window, or copy your report before you close the tab.</div>`);
+  else n.push(`<div class="notice info">Your progress saves in this browser only, so finish the assignment on the same computer and browser. When you're done, or when a step asks for ${TRAINER}'s okay, copy your report and send it to ${TRAINER}.</div>`);
+  $("notices").innerHTML = n.join("");
+}
+
+/* ---------- Rail ---------- */
+function renderRail() {
+  const unlocked = unlockedSet();
+  const track = trackSteps();
+  const doneCount = track.filter(s => stepStatus(s) === "done").length;
+  const pct = track.length ? Math.round(doneCount / track.length * 100) : 0;
+  const p = S.pack;
+  let html = `<div class="assignment"><span class="sub">your assignment</span><div><strong>${esc(p.title)}</strong></div>${p.property ? `<div>Property: ${esc(p.property)}</div>` : ""}${p.brief ? `<pre>${esc(p.brief)}</pre>` : ""}
+  <div class="field" style="margin:10px 0 0"><label for="vaName">Your name (goes on your report)</label><input type="text" id="vaName" value="${esc(S.progress.name || "")}" autocomplete="name"></div></div>`;
+  html += `<div class="progress"><div class="progress-top"><span>${doneCount} of ${track.length} steps</span><span>${pct}%</span></div><div class="bar"><span style="width:${pct}%"></span></div></div>`;
+  html += `<nav class="chapters">`;
+  assignedChapters().forEach((ch, ci) => {
+    const steps = ch.steps.filter(s => track.some(x => x.id === s.id));
+    const chDone = steps.filter(s => stepStatus(s) === "done").length;
+    const anyOpen = steps.some(s => unlocked.has(s.id));
+    html += `<div class="ch ${anyOpen ? "" : "locked"}"><div class="ch-head"><span class="ch-num">${ci + 1}</span><span class="ch-title">${esc(ch.title)}</span><span class="ch-meta">${chDone}/${steps.length}</span></div><ul class="steps">`;
+    steps.forEach(s => {
+      const st = stepStatus(s); const isOpen = unlocked.has(s.id);
+      const icon = !isOpen && st !== "done" ? ICON.locked : ICON[st];
+      html += `<li><button class="step-link" type="button" data-step="${s.id}" ${isOpen || st === "done" ? "" : "disabled"} aria-current="${S.view.stepId === s.id}"><span class="dot">${icon}</span><span>${label(STEP_BY_ID[s.id])} ${esc(s.title)}</span></button></li>`;
+    });
+    html += `</ul></div>`;
+  });
+  html += `</nav>`;
+  html += `<div class="report-actions"><button class="btn ghost" type="button" id="copyReport">Copy report for ${TRAINER}</button><button class="btn ghost" type="button" id="downloadReport">Download report</button><div class="saved-note" id="reportNote"></div></div>`;
+  $("rail").innerHTML = html;
+  $("rail").querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => { S.view.stepId = b.dataset.step; renderLearn(); window.scrollTo({ top: 0, behavior: "smooth" }); }));
+  $("vaName").addEventListener("change", e => { S.progress.name = e.target.value.trim(); save(); });
+  $("copyReport").addEventListener("click", copyReport);
+  $("downloadReport").addEventListener("click", downloadReport);
+}
+
+function currentStepId() {
+  const track = trackSteps(); const unlocked = unlockedSet();
+  if (S.view.stepId && STEP_BY_ID[S.view.stepId] && track.some(s => s.id === S.view.stepId)) return S.view.stepId;
+  const firstOpen = track.find(s => unlocked.has(s.id) && stepStatus(s) !== "done");
+  return (firstOpen || track[track.length - 1] || {}).id || null;
+}
+
+/* ---------- Assignment pack inside a step ---------- */
+function renderPack(step, rec, locked) {
+  const p = S.pack; if (!step.pack) return "";
+  const prompts = packPrompts();
+  if (step.pack === "paste") {
+    // Spyglasses' Paste import reads spreadsheet cells: tab-separated columns under a header row.
+    const text = ["Prompt\tType\tTag 1\tTag 2"].concat(prompts.map(r => [r.text, r.type, ...(r.tags || [])].join("\t"))).join("\n");
+    return `<div class="block wide"><div class="block-label"><span class="sub">your prompt list</span><small>${prompts.length} prompts for ${esc(p.property || "")}, with their types and tags</small></div>
+<textarea class="paste" id="pasteText" readonly>${esc(text)}</textarea>
+<div class="row" style="margin-top:8px"><button class="btn ghost" type="button" id="copyPaste">Copy the list</button><span class="count">Expected preview count: ${prompts.length}</span><span class="saved-note" id="copyPasteNote"></span></div></div>`;
+  }
+  if (step.pack === "types" || step.pack === "tags") {
+    const rows = rec.rows || []; const done = prompts.filter((_, i) => rows[i]).length;
+    const head = step.pack === "types" ? "Type set" : "Tags set";
+    let html = `<div class="block wide"><div class="block-label"><span class="sub">your assignment sheet</span><small>Find each one with the search box in Spyglasses and tick it once it matches.</small></div>
+<div class="table-wrap"><table class="pack-table"><thead><tr><th>#</th><th>Prompt</th><th>Type</th><th>Tags</th><th>${head}</th></tr></thead><tbody>`;
+    prompts.forEach((r, i) => {
+      html += `<tr class="${rows[i] ? "ticked" : ""}"><td class="n">${i + 1}</td><td>${esc(r.text)}</td><td>${esc(r.type)}</td><td>${(r.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</td><td class="tick"><input type="checkbox" data-row="${i}" aria-label="${head}: prompt ${i + 1}" ${rows[i] ? "checked" : ""} ${locked ? "disabled" : ""}></td></tr>`;
+    });
+    html += `</tbody></table></div><div class="count" id="rowCount">${done} of ${prompts.length} done</div>`;
+    if (step.pack === "tags" && Array.isArray(p.tagsInUse) && p.tagsInUse.length) html += `<p class="count" style="margin-top:8px">Tags already on this property: ${p.tagsInUse.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</p>`;
+    return html + `</div>`;
+  }
+  if (step.pack === "projects") {
+    const projects = Array.isArray(p.projects) ? p.projects : [];
+    let html = `<div class="block wide"><div class="block-label"><span class="sub">your projects</span><small>Add the ${prompts.length} new prompts to each one</small></div>
+<div class="table-wrap"><table><thead><tr><th>Project</th><th>Type</th><th>Prompts before</th><th>Prompts after</th></tr></thead><tbody>`;
+    projects.forEach(pr => { html += `<tr><td>${esc(pr.name)}</td><td>${esc(pr.type || "")}</td><td>${esc(pr.before ?? "")}</td><td>${esc(pr.after ?? "")}</td></tr>`; });
+    html += `</tbody></table></div>`;
+    if (p.projectNote) html += `<p class="count">${esc(p.projectNote)}</p>`;
+    return html + `</div>`;
+  }
+  return "";
+}
+
+// Annotated screenshots for a step, shipped inside the encrypted pack as data URIs.
+function renderVisuals(step) {
+  const shots = (S.pack && S.pack.visuals && S.pack.visuals[step.id]) || [];
+  return shots.map(v => `<figure class="shot"><img src="${esc(v.src)}" alt="${esc(v.alt || v.caption || "")}" loading="lazy"><figcaption>${esc(v.caption || "")}</figcaption></figure>`).join("");
+}
+
+/* ---------- Step ---------- */
+function renderStep() {
+  const card = $("stepCard");
+  const id = currentStepId(); S.view.stepId = id;
+  if (!id) { card.innerHTML = `<div class="locked-card"><div class="eyebrow">Nothing to do yet</div><h1 class="step-title">This assignment has no steps</h1><p class="prose">Send ${TRAINER} a note so she can fix the link.</p></div>`; return; }
+  const step = STEP_BY_ID[id]; const ch = CURRICULUM[step.chapterIndex];
+  const unlocked = unlockedSet(); const st = stepStatus(step);
+  const rec = stepRec(id);
+  const track = trackSteps(); const idx = track.findIndex(s => s.id === id);
+  const prev = track[idx - 1], next = track[idx + 1];
+  const tag = isGate(step) ? `<span class="pill pending">Wait for ${TRAINER}'s okay after this step</span>` : (step.review ? `<span class="pill">${TRAINER} checks this in your report</span>` : "");
+  const eyebrow = `<div class="eyebrow"><span>Chapter ${assignedChapters().indexOf(ch) + 1} · ${esc(ch.title)}</span><span>Step ${label(step)}</span>${tag}</div>`;
+
+  if (!unlocked.has(id) && st !== "done") {
+    const blocker = track.find(s => stepStatus(s) !== "done");
+    card.innerHTML = `${eyebrow}<h1 class="step-title">${esc(step.title)}</h1><div class="locked-card"><p>This step opens once ${blocker ? "step " + label(blocker) + " is complete" + (isGate(blocker) ? " and " + TRAINER + " has okayed it" : "") : "the step before it is complete"}.</p></div>`;
+    return;
+  }
+  const locked = st !== "open";
+  let html = `${eyebrow}<h1 class="step-title">${esc(step.title)}</h1><div class="prose">${step.body}</div>`;
+  if (step.why) html += `<aside class="why"><span class="sub">why it matters</span>${esc(step.why)}</aside>`;
+  html += renderVisuals(step);
+  html += renderPack(step, rec, locked);
+
+  if (step.quiz) {
+    const ans = rec.quiz;
+    html += `<div class="block"><div class="block-label"><span class="sub">check yourself</span><small>Pick the right answer to continue</small></div><p class="quiz-q">${esc(step.quiz.q)}</p>`;
+    step.quiz.options.forEach((o, i) => {
+      const chosen = ans === i; const cls = chosen ? (i === step.quiz.answer ? "right" : "wrong") : "";
+      html += `<label class="opt ${cls}"><input type="radio" name="quiz" value="${i}" ${chosen ? "checked" : ""} ${locked ? "disabled" : ""}><span>${esc(o)}</span></label>`;
+    });
+    if (ans !== undefined && ans !== null) html += ans === step.quiz.answer ? `<div class="feedback right">Right. ${esc(step.quiz.explain || "")}</div>` : `<div class="feedback wrong">Not quite. Give it another look and try again.</div>`;
+    html += `</div>`;
+  }
+  if (step.checks && step.checks.length) {
+    html += `<div class="block"><div class="block-label"><span class="sub">confirm</span><small>Tick each one when it's true</small></div>`;
+    step.checks.forEach((c, i) => { html += `<label class="check"><input type="checkbox" data-check="${i}" ${rec.checks && rec.checks[i] ? "checked" : ""} ${locked ? "disabled" : ""}><span>${esc(c)}</span></label>`; });
+    html += `</div>`;
+  }
+  if (step.evidence) {
+    html += `<div class="block"><div class="block-label"><span class="sub">record it</span><small>${step.evidence.required ? "Required" : "Optional"}</small></div><label for="evidence" class="quiz-q" style="display:block">${esc(step.evidence.label)}</label><textarea id="evidence" placeholder="${esc(step.evidence.placeholder || "")}" ${locked ? "disabled" : ""}>${esc(rec.evidence || "")}</textarea><div class="saved-note"></div></div>`;
+  }
+  html += `<div class="actions" id="stepActions"></div>`;
+  html += `<div class="nav"><button class="btn ghost" type="button" id="prevBtn" ${prev ? "" : "disabled"}>← ${prev ? "Step " + label(prev) : "Back"}</button><button class="btn ghost" type="button" id="nextBtn" ${next && (unlocked.has(next.id) || stepStatus(next) === "done") ? "" : "disabled"}>${next ? "Step " + label(next) : "Next"} →</button></div>`;
+  card.innerHTML = html;
+  renderActions(step);
+
+  card.querySelectorAll('input[name="quiz"]').forEach(r => r.addEventListener("change", () => { setRec(id, { quiz: Number(r.value) }); renderStep(); }));
+  card.querySelectorAll("[data-check]").forEach(cb => cb.addEventListener("change", () => {
+    const checks = (stepRec(id).checks || []).slice(); checks[Number(cb.dataset.check)] = cb.checked; setRec(id, { checks }); renderActions(step);
+  }));
+  card.querySelectorAll("[data-row]").forEach(cb => cb.addEventListener("change", () => {
+    const rows = (stepRec(id).rows || []).slice(); rows[Number(cb.dataset.row)] = cb.checked; setRec(id, { rows });
+    cb.closest("tr").classList.toggle("ticked", cb.checked);
+    const total = packPrompts().length; const rc = $("rowCount"); if (rc) rc.textContent = `${total - packRowsLeft(step, stepRec(id))} of ${total} done`;
+    renderActions(step);
+  }));
+  const cp = $("copyPaste"); if (cp) cp.addEventListener("click", () => copyText($("pasteText").value, $("copyPasteNote"), $("pasteText")));
+  const ev = $("evidence");
+  if (ev) ev.addEventListener("input", () => {
+    setRec(id, { evidence: ev.value }, false); renderActions(step);
+    clearTimeout(evidenceTimer); const note = card.querySelector(".saved-note"); if (note) note.textContent = "Saving…";
+    evidenceTimer = setTimeout(save, 700);
+  });
+  $("prevBtn").addEventListener("click", () => { if (prev) { S.view.stepId = prev.id; renderLearn(); } });
+  $("nextBtn").addEventListener("click", () => { if (next) { S.view.stepId = next.id; renderLearn(); } });
+}
+
+function renderActions(step) {
+  const el = $("stepActions"); if (!el) return;
+  const st = stepStatus(step); const rec = stepRec(step.id); const ready = readyToComplete(step, rec);
+  let html = "";
+  if (st === "done") html = `<span class="status done">${ICON.done} Complete${isGate(step) ? ` and okayed by ${TRAINER}` : ""}</span>`;
+  else if (st === "pending") {
+    html = `<div class="gate" style="flex-basis:100%"><strong>Send ${TRAINER} your report now</strong> (Copy report in the left column) and wait for her okay before you go on. When she says go ahead, tick the box below.</div>
+<label class="check" style="flex-basis:100%"><input type="checkbox" id="okayBox"><span>${TRAINER} okayed this step</span></label>
+<button class="btn ghost" type="button" id="reopenBtn">Edit my answers</button>`;
+  } else {
+    html += `<button class="btn primary" type="button" id="completeBtn" ${ready ? "" : "disabled"}>${isGate(step) ? "Finish and send for " + TRAINER + "'s okay" : "Mark complete"}</button>`;
+    if (!ready) html += `<span class="missing">${missingText(step, rec)}</span>`;
+  }
+  el.innerHTML = html;
+  const cb = $("completeBtn"); if (cb) cb.addEventListener("click", () => {
+    setRec(step.id, { done: true, doneAt: nowIso() });
+    const track = trackSteps(); const i = track.findIndex(s => s.id === step.id);
+    if (!isGate(step) && track[i + 1]) S.view.stepId = track[i + 1].id;
+    renderLearn();
+  });
+  const ok = $("okayBox"); if (ok) ok.addEventListener("change", () => { if (ok.checked) { setRec(step.id, { okayed: true, okayedAt: nowIso() }); renderLearn(); } });
+  const rb = $("reopenBtn"); if (rb) rb.addEventListener("click", () => { setRec(step.id, { done: false }); renderLearn(); });
+}
+
+function missingText(step, rec) {
+  const m = [];
+  if (step.quiz && rec.quiz !== step.quiz.answer) m.push("answer the question");
+  const open = (step.checks || []).filter((_, i) => !(rec.checks && rec.checks[i])).length;
+  if (open) m.push(`tick ${open} more`);
+  const rowsLeft = packRowsLeft(step, rec);
+  if (rowsLeft) m.push(`tick ${rowsLeft} more ${rowsLeft === 1 ? "prompt" : "prompts"} in the sheet`);
+  if (step.evidence && step.evidence.required && !(rec.evidence || "").trim()) m.push("fill in the record");
+  return m.length ? "To finish: " + m.join(", ") + "." : "";
+}
+
+function renderLearn() { renderRail(); renderStep(); }
+
+/* ---------- Report ---------- */
+// Readable summary first, then a data block Laura can paste back to Claude to check against Spyglasses.
+function buildReport() {
+  const p = S.pack; const prompts = packPrompts();
+  const L = [`Field Training report`, `Assignment: ${p.title} (${PACK_ID})`, `Property: ${p.property || ""}`, `VA: ${S.progress.name || "(no name entered)"}`, `Generated: ${new Date().toLocaleString()}`, ``];
+  trackSteps().forEach(s => {
+    const r = stepRec(s.id); const st = stepStatus(s);
+    const status = { done: "complete", pending: "complete, waiting for okay", open: (r.checks || r.evidence || r.rows) ? "in progress" : "not started" }[st];
+    L.push(`${label(s)} ${s.title} [${s.id}]: ${status}${r.doneAt ? " (" + fmtDate(r.doneAt) + ")" : ""}${r.okayedAt ? ", okayed " + fmtDate(r.okayedAt) : ""}`);
+    if (st === "open" && !(r.checks || r.evidence || r.rows)) return;
+    (s.checks || []).forEach((c, i) => { if (!(r.checks && r.checks[i])) L.push(`   NOT TICKED: ${c}`); });
+    if (s.pack === "types" || s.pack === "tags") {
+      const left = prompts.map((pr, i) => (r.rows && r.rows[i]) ? null : `#${i + 1} ${pr.text}`).filter(Boolean);
+      L.push(`   ${prompts.length - left.length} of ${prompts.length} prompts ticked${left.length ? ". Not ticked: " + left.join(" | ") : ""}`);
+    }
+    if (r.evidence) L.push("   " + r.evidence.replace(/\n/g, "\n   "));
+  });
+  const data = { assignment: PACK_ID, packVersion: p.updatedAt || null, va: S.progress.name || "", generatedAt: nowIso(), steps: S.progress.steps };
+  L.push(``, `---- data for ${TRAINER} (leave as is) ----`, JSON.stringify(data));
+  return L.join("\n");
+}
+
+function copyText(text, note, selectEl) {
+  const fallback = () => {
+    if (selectEl) { selectEl.focus(); selectEl.select(); note.textContent = "Selected. Press Ctrl+C or Cmd+C to copy."; return; }
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.minHeight = "160px"; note.replaceWith(ta); ta.select();
+  };
+  try { navigator.clipboard.writeText(text).then(() => { note.textContent = "Copied."; }, fallback); } catch { fallback(); }
+}
+function copyReport() { copyText(buildReport(), $("reportNote")); const n = $("reportNote"); if (n) setTimeout(() => { if (n.textContent === "Copied.") n.textContent = "Copied. Paste it into a message to " + TRAINER + "."; }, 50); }
+function downloadReport() {
+  const blob = new Blob([buildReport()], { type: "text/plain" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `training-report-${PACK_ID}-${new Date().toISOString().slice(0, 10)}.txt`;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ---------- Boot ---------- */
+function fail(title, text) {
+  $("modeChip").textContent = "No assignment";
+  $("rail").innerHTML = "";
+  $("stepCard").innerHTML = `<div class="locked-card"><div class="eyebrow">Something's off with the link</div><h1 class="step-title">${esc(title)}</h1><p class="prose">${esc(text)}</p></div>`;
+}
+
+/* ---------- Password ---------- */
+// The assignment is published only as AES-GCM ciphertext (key from PBKDF2-SHA256); the password decrypts it here in the browser.
+const KEY_STORE = "field-training-key-" + PACK_ID;
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function decryptPack(enc, pw) {
+  try {
+    const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(enc.salt), iterations: enc.iter, hash: "SHA-256" }, km, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(enc.iv) }, key, b64(enc.ct));
+    return JSON.parse(new TextDecoder().decode(plain));
+  } catch { return null; }
+}
+
+function start(pack, pw) {
+  try { localStorage.setItem(KEY_STORE, pw); } catch {}
+  S.pack = pack;
+  if (!Array.isArray(S.pack.chapters)) S.pack.chapters = [];
+  load();
+  renderChrome(); renderLearn();
+}
+
+function showLock(enc) {
+  $("modeChip").textContent = "Locked";
+  $("rail").innerHTML = "";
+  $("stepCard").innerHTML = `<div class="eyebrow">Field Training</div><h1 class="step-title">Enter your password</h1>
+<p class="prose">${TRAINER} sent you a password with this link. You only need to enter it once on this computer.</p>
+<form id="lockForm" class="block" style="border-top:0;padding-top:0"><label for="pw" class="quiz-q" style="display:block">Password</label>
+<input type="password" id="pw" autocomplete="current-password" autofocus>
+<div class="actions"><button class="btn primary" type="submit" id="unlockBtn">Open my assignment</button><span class="missing" id="lockErr" role="alert"></span></div></form>`;
+  $("lockForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const pw = $("pw").value.trim(); if (!pw) return;
+    $("unlockBtn").disabled = true; $("lockErr").textContent = "Checking…";
+    const pack = await decryptPack(enc, pw);
+    if (pack) return start(pack, pw);
+    $("unlockBtn").disabled = false; $("lockErr").textContent = "That password didn't work. Check it against " + TRAINER + "'s message and try again.";
+  });
+}
+
+async function boot() {
+  $("stepCard").innerHTML = `<div class="eyebrow">One moment</div><h1 class="step-title">Loading your training</h1>`;
+  if (!PACK_ID) return fail("This link has no assignment on it", `Use the full link ${TRAINER} sent you. It ends with ?a= and the assignment name.`);
+  if (!window.crypto || !crypto.subtle) return fail("This page needs a secure connection", "Open it from the https:// link, not a saved copy.");
+  let enc;
+  document.title += " | boot " + Math.round(performance.now());
+  try {
+    const res = await fetch(`packs/${PACK_ID}.enc.json`, { cache: "no-store" });
+    if (!res.ok) throw new Error(String(res.status));
+    enc = await res.json(); document.title += " | fetched " + Math.round(performance.now());
+  } catch { return fail("This assignment couldn't load", `Check your connection and reload. If it still doesn't load, send ${TRAINER} the link you used.`); }
+  // A password in the link (#k=...) never reaches the server; drop it from the address bar once read.
+  const fromLink = new URLSearchParams(location.hash.slice(1)).get("k");
+  if (fromLink) history.replaceState(null, "", location.pathname + location.search);
+  let saved = null; try { saved = localStorage.getItem(KEY_STORE); } catch {}
+  for (const pw of [fromLink, saved]) {
+    if (!pw) continue;
+    document.title += " | decrypting " + Math.round(performance.now());
+    const pack = await decryptPack(enc, pw);
+    document.title += " | decrypted: " + Math.round(performance.now()); document.title += !!pack;
+    if (pack) { try { start(pack, pw); document.title += " | started " + Math.round(performance.now()); } catch (err) { document.title += ' ERR ' + err; } return; }
+  }
+  showLock(enc);
+}
+boot();
+})();
+</script>
+</body>
+</html>

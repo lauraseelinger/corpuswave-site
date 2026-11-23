@@ -276,7 +276,7 @@ const CURRICULUM = [
   { id: "orient", title: "How AI visibility tracking works", summary: "What Spyglasses measures and the rules we work by.", steps: [
     { id: "1.1", title: "What we're actually measuring",
       body: `<p>When someone asks ChatGPT or Gemini for a recommendation, the answer names some brands and skips others. Spyglasses asks the same set of questions every night and records who gets named, which websites get cited and what the engine searched for before it answered.</p>
-<p>Setup is where we make sure those questions are the right ones and the brand's profile is accurate. Everything the client sees later sits on top of this part.</p>`,
+<p>Setup is where we make sure those questions are the right ones and the brand's profile is accurate.</p>`,
       why: "A tracking setup with the wrong questions still produces clean, confident charts. Nobody can tell from the chart that it's measuring the wrong thing, which is why we're careful here.",
       quiz: { q: "Which engines does Spyglasses track every night on every plan?", options: ["ChatGPT, Claude and Perplexity", "ChatGPT, Gemini and Google AI Overviews", "All seven engines we test by hand"], answer: 1,
         explain: "Claude is available by request and Perplexity is a paid add-on. That gap is one reason we still run some prompts by hand." } },
@@ -413,7 +413,7 @@ const CURRICULUM = [
   { id: "addto", title: "Add prompts to running projects", summary: "For properties that already track every night.", steps: [
     { id: "7.1", title: "Add the new prompts to each project", review: true, pack: "projects",
       body: `<p>Some properties already have projects running every night, and when yours does you add the new prompts to the projects listed in your assignment instead of creating a new one.</p>
-<p>Open each project from <span class="path">Projects</span> and use its option to add prompts, selecting only the new prompts from your assignment and leaving every prompt that's already in the project. Spyglasses shows a warning that adding prompts changes the project's numbers from that day on. Continue past it, because adding to the running projects was decided on purpose.</p>
+<p>Open each project from <span class="path">Projects</span>, go to its <span class="path">Prompts</span> tab and click <strong>Add prompts</strong> in the Tracked prompts box. Select only the new prompts from your assignment and leave every prompt that's already in the project. Spyglasses shows a warning that adding prompts changes the project's numbers from that day on. Continue past it, because adding to the running projects was decided on purpose.</p>
 <p>Don't use Auto-pick, and add the prompts to every project the same day you import them.</p>`,
       why: "A prompt that's imported but never added to a project doesn't run, and nothing on the screen tells you it's missing.",
       quiz: { q: "Spyglasses warns that adding prompts will affect the project's metrics. What do you do?", options: ["Stop and create a new project instead", "Continue, because the warning is expected when adding prompts to a running project", "Remove the old prompts first so the numbers stay clean"], answer: 1,
@@ -429,6 +429,9 @@ const CURRICULUM = [
       evidence: { label: "Anything " + TRAINER + " should know (or “nothing”)", placeholder: "Two pages weren't crawled yet. Everything else is in.", required: true } },
   ]},
 ];
+
+// This page trains data entry, so it drops the course's explainer boxes and quizzes.
+CURRICULUM.forEach(ch => ch.steps.forEach(s => { delete s.why; delete s.quiz; }));
 
 const ALL_STEPS = [];
 CURRICULUM.forEach((ch, ci) => ch.steps.forEach((s, si) => ALL_STEPS.push({ ...s, chapterId: ch.id, chapterIndex: ci, stepIndex: si })));

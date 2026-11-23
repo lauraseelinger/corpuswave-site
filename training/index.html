@@ -224,6 +224,16 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.015em; }
 .sub { font-style: normal; font-weight: 600; text-transform: none; letter-spacing: 0; }
 .brand-mark { font-weight: 600; }
 .ch-title { font-weight: 500; }
+/* Sidebar: its own tinted panel so directions, progress and chapters read as one place to look. */
+:root { --rail-bg: #e6eef8; --rail-line: #c9d8ec; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --rail-bg: #1a2432; --rail-line: #2c3c52; } }
+:root[data-theme="dark"] { --rail-bg: #1a2432; --rail-line: #2c3c52; }
+.rail { background: var(--rail-bg); border: 1px solid var(--rail-line); border-radius: 14px; padding: 14px; }
+.rail .assignment, .rail .progress { border-color: var(--rail-line); }
+.rail .step-link:hover:not([disabled]), .rail .ch-head:hover { background: var(--surface); }
+.rail .step-link[aria-current="true"] { background: var(--surface); }
+.rail .steps { border-left-color: var(--rail-line); }
+.rail .btn.ghost { background: var(--surface); border-color: var(--rail-line); }
 input[type="password"] { width: 100%; max-width: 360px; font: inherit; font-size: 15px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
 input[type="password"]:focus { border-color: var(--rust); outline: none; }
 .report-actions { display: flex; flex-direction: column; gap: 6px; }

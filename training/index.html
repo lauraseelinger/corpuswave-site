@@ -422,6 +422,8 @@ const STEP_BY_ID = Object.fromEntries(ALL_STEPS.map(s => [s.id, s]));
 /* ---------- State ---------- */
 const PACK_ID = (new URLSearchParams(location.search).get("a") || "").replace(/[^a-z0-9-]/gi, "");
 const STORE_KEY = "field-training-" + PACK_ID;
+// ?demo=1 is Laura's click-through: every step open, nothing saved, so her own clicking never touches a real record.
+const DEMO = new URLSearchParams(location.search).has("demo");
 const S = {
   pack: null,               // {title, property, brief, chapters, gates, prompts in on-screen order, projects}
   progress: { name: "", steps: {} },
@@ -481,6 +483,7 @@ function trackSteps() {
 }
 
 function unlockedSet() {
+  if (DEMO) return new Set(ALL_STEPS.map(s => s.id));
   const open = new Set();
   for (const s of trackSteps()) { open.add(s.id); if (stepStatus(s) !== "done") break; }
   return open;
@@ -488,11 +491,13 @@ function unlockedSet() {
 
 /* ---------- Persistence (this browser only) ---------- */
 function load() {
+  if (DEMO) return;
   try { const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (saved && saved.steps) S.progress = saved; }
   catch { S.storageOk = false; }
 }
 function save() {
   S.progress.updatedAt = nowIso();
+  if (DEMO) { const el = document.querySelector(".saved-note"); if (el) el.textContent = "Demo: not saved"; return; }
   try { localStorage.setItem(STORE_KEY, JSON.stringify(S.progress)); S.storageOk = true; }
   catch { S.storageOk = false; renderChrome(); }
   const el = document.querySelector(".saved-note"); if (el && S.storageOk) el.textContent = "Saved in this browser";
@@ -510,10 +515,11 @@ function setRec(stepId, patch, persist = true) {
 /* ---------- Chrome ---------- */
 function renderChrome() {
   const chip = $("modeChip");
-  chip.className = S.storageOk ? "chip ok" : "chip warn";
-  chip.textContent = S.storageOk ? "Saved in this browser" : "Not saving";
+  chip.className = DEMO ? "chip warn" : S.storageOk ? "chip ok" : "chip warn";
+  chip.textContent = DEMO ? "Demo: nothing saved" : S.storageOk ? "Saved in this browser" : "Not saving";
   const n = [];
-  if (!S.storageOk) n.push(`<div class="notice warn"><strong>This browser isn't letting the page save your progress.</strong> A private window does this. Open the link in a normal window, or copy your report before you close the tab.</div>`);
+  if (DEMO) n.push(`<div class="notice warn"><strong>Demo mode.</strong> Every step is open, so click through in any order. Nothing you tick or type is saved, and reloading starts over. The report buttons still work, so you can see what your VA will send.</div>`);
+  else if (!S.storageOk) n.push(`<div class="notice warn"><strong>This browser isn't letting the page save your progress.</strong> A private window does this. Open the link in a normal window, or copy your report before you close the tab.</div>`);
   else n.push(`<div class="notice info">Your progress saves in this browser only, so finish the assignment on the same computer and browser. When you're done, or when a step asks for ${TRAINER}'s okay, copy your report and send it to ${TRAINER}.</div>`);
   $("notices").innerHTML = n.join("");
 }

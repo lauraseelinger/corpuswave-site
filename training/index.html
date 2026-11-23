@@ -237,6 +237,9 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.015em; }
 .rail .btn.ghost { background: var(--surface); border-color: var(--rail-line); }
 input[type="password"] { width: 100%; max-width: 360px; font: inherit; font-size: 15px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
 input[type="password"]:focus { border-color: var(--rust); outline: none; }
+.shot { margin: 18px 0 0; max-width: 900px; }
+.shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.shot figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
 .report-actions { display: flex; flex-direction: column; gap: 6px; }
 .gate { margin-top: 18px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--blue); background: var(--blue-soft); max-width: 68ch; font-size: 13px; }
 </style>
@@ -340,39 +343,18 @@ const CURRICULUM = [
 <p>If your assignment says the property is already set up, its prompts are real and being tracked. Delete nothing and move on.</p>`,
       checks: ["The default prompts are deleted, or my assignment says the property is already set up and I deleted nothing"] },
     { id: "3.2", title: "Import the prompt list", pack: "paste",
-      body: `<p>Go to <span class="path">Manage → Prompts → Import → Paste</span>. The paste box splits on line breaks, commas and tabs, so a comma inside a prompt cuts it in two. The prompt files you get from ${TRAINER} already have commas removed.</p>
-<p>Paste one prompt per line, click <strong>Parse Prompts</strong> and check that the preview count matches the count in your assignment before you import. If the counts don't match, stop and send a note. If Spyglasses warns that a prompt is very similar to one already in the list, write down which one and tell ${TRAINER} instead of deciding yourself.</p>`,
-      quiz: { q: "A prompt reads “Quiet, family-friendly hotels in Monteverde.” What happens if you paste it as is?", options: ["It imports fine", "It splits into two prompts at the comma", "Spyglasses rejects the whole paste"], answer: 1,
-        explain: "That's why the paste files come comma-free. Check the preview count every time anyway." },
-      checks: ["The counts matched before I clicked Import"],
-      evidence: { label: "Preview count / expected count", placeholder: "21 / 21", required: true } },
-    { id: "3.3", title: "Set the type on every prompt", pack: "types",
-      body: `<p>Imports default every prompt to <strong>Category Best</strong>. The type sets the buyer stage, so leaving the default piles everything into one stage and skews the results.</p>
-<p>Open each prompt, pick the type from your assignment sheet and save. The prompt list shows the newest first, which is the reverse of paste order, and the assignment sheet is already in on-screen order. If you ever work without a sheet, this guide covers most prompts.</p>
-<div class="table-wrap"><table><thead><tr><th>The prompt…</th><th>Type</th></tr></thead><tbody>
-<tr><td>Names the brand ("What is [brand]?", "Is [brand] all-inclusive?")</td><td>Brand Identity</td></tr>
-<tr><td>Pits the brand against a named competitor</td><td>Brand Comparison</td></tr>
-<tr><td>Asks for the best option in a category</td><td>Category Best</td></tr>
-<tr><td>"I don't know where to start" or a trigger event</td><td>Category Entry Point</td></tr>
-<tr><td>A concrete task to get done</td><td>Jobs to Be Done</td></tr>
-<tr><td>Describes who's asking (a family, a student)</td><td>Segment Focused</td></tr>
-<tr><td>Asks on someone else's behalf</td><td>Stakeholder Perspective</td></tr>
-<tr><td>A specific situation or constraint</td><td>Use Case Solution</td></tr>
-<tr><td>Price, value or "is it worth it"</td><td>Budget Constrained</td></tr>
-<tr><td>"[service] in [city]" and nothing more</td><td>Local Services</td></tr>
-<tr><td>Who helps people in an area, or which is best nearby</td><td>Local Comparison</td></tr>
-<tr><td>"What is [concept]" or general learning</td><td>Buyer's Journey (Awareness)</td></tr>
-<tr><td>Weighing a tradeoff before acting</td><td>Buyer's Journey (Consideration)</td></tr>
-<tr><td>Ready to pick a provider</td><td>Buyer's Journey (Decision)</td></tr>
-</tbody></table></div>`,
-      quiz: { q: "“Is [brand] all-inclusive?” Which type?", options: ["Category Best", "Brand Identity", "Budget Constrained"], answer: 1,
-        explain: "It names the brand, so it's Brand Identity. Those prompts are left out of share of voice and scored on key messages instead." },
-      checks: ["Every prompt has a type, and none was left on the default by accident"] },
-    { id: "3.4", title: "Tag every prompt", pack: "tags",
-      body: `<p>Give each prompt two tags, one for who's asking (family, couple, identity) and one for the topic or place (pricing, gluten-free, a city). Use lowercase with hyphens instead of spaces, spelled exactly as the assignment sheet has them.</p>
-<p>Leave the Location field and the Context fields blank.</p>`,
-      why: "Tags are how results get sliced later. A tag spelled two ways becomes two separate groups, and the comparison breaks.",
-      checks: ["Every prompt has two tags", "The tags match the assignment sheet exactly", "Location and Context are blank"] },
+      body: `<p>Go to <span class="path">Manage → Prompts</span> and click <strong>Import</strong>. Stay on the <strong>Paste</strong> tab and paste the list from your assignment exactly as it is, header row included. The list already carries each prompt's type and two tags in their own columns, so they come in with the prompts.</p>
+<p>Click <strong>Preview prompts</strong>. Before you import, check that the preview count matches your assignment and that every row shows a type and two tags. If anything is off, stop and send a note. If Spyglasses warns that a prompt is very similar to one already in the list, write down which one and tell ${TRAINER} instead of deciding yourself.</p>`,
+      checks: ["The preview count matched my assignment before I imported", "Every row in the preview had a type and two tags"],
+      evidence: { label: "Preview count / expected count", placeholder: "29 / 29", required: true } },
+    { id: "3.3", title: "Check the type on every prompt", pack: "types",
+      body: `<p>In the prompt list, each prompt's type shows in small text under the prompt, with the buyer stage beside it. Find each prompt from your assignment with the search box and compare its type with the sheet.</p>
+<p>If one is wrong, click the <strong>⋯</strong> at the end of its row, choose <strong>Edit</strong>, pick the right type under Prompt Type and click <strong>Update Prompt</strong>.</p>`,
+      checks: ["Every prompt's type matches the sheet"] },
+    { id: "3.4", title: "Check the tags on every prompt", pack: "tags",
+      body: `<p>The Tags column shows each prompt's tags. Compare them with the sheet. Spyglasses saves tags in lowercase, so capital letters don't matter.</p>
+<p>To fix one, open <strong>⋯ → Edit</strong>, remove the wrong tag with its ×, type the right one in Add a tag (or click it in the Existing list) and click <strong>Update Prompt</strong>. Leave Location and Context blank.</p>`,
+      checks: ["Every prompt has the two tags on the sheet", "Location and Context are blank"] },
   ]},
   { id: "locations", title: "Locations", summary: "Only for clients tied to specific places.", steps: [
     { id: "4.1", title: "Add the cities",
@@ -580,16 +562,16 @@ function renderPack(step, rec, locked) {
   const p = S.pack; if (!step.pack) return "";
   const prompts = packPrompts();
   if (step.pack === "paste") {
-    // The prompt list shows newest first, so the paste runs bottom to top of the on-screen table.
-    const text = prompts.slice().reverse().map(r => r.text).join("\n");
-    return `<div class="block wide"><div class="block-label"><span class="sub">your prompt list</span><small>${prompts.length} prompts for ${esc(p.property || "")}, already comma-free</small></div>
+    // Spyglasses' Paste import reads spreadsheet cells: tab-separated columns under a header row.
+    const text = ["Prompt\tType\tTag 1\tTag 2"].concat(prompts.map(r => [r.text, r.type, ...(r.tags || [])].join("\t"))).join("\n");
+    return `<div class="block wide"><div class="block-label"><span class="sub">your prompt list</span><small>${prompts.length} prompts for ${esc(p.property || "")}, with their types and tags</small></div>
 <textarea class="paste" id="pasteText" readonly>${esc(text)}</textarea>
 <div class="row" style="margin-top:8px"><button class="btn ghost" type="button" id="copyPaste">Copy the list</button><span class="count">Expected preview count: ${prompts.length}</span><span class="saved-note" id="copyPasteNote"></span></div></div>`;
   }
   if (step.pack === "types" || step.pack === "tags") {
     const rows = rec.rows || []; const done = prompts.filter((_, i) => rows[i]).length;
     const head = step.pack === "types" ? "Type set" : "Tags set";
-    let html = `<div class="block wide"><div class="block-label"><span class="sub">your assignment sheet</span><small>Top to bottom, the order they appear on screen. Tick each one as you finish it.</small></div>
+    let html = `<div class="block wide"><div class="block-label"><span class="sub">your assignment sheet</span><small>Find each one with the search box in Spyglasses and tick it once it matches.</small></div>
 <div class="table-wrap"><table class="pack-table"><thead><tr><th>#</th><th>Prompt</th><th>Type</th><th>Tags</th><th>${head}</th></tr></thead><tbody>`;
     prompts.forEach((r, i) => {
       html += `<tr class="${rows[i] ? "ticked" : ""}"><td class="n">${i + 1}</td><td>${esc(r.text)}</td><td>${esc(r.type)}</td><td>${(r.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</td><td class="tick"><input type="checkbox" data-row="${i}" aria-label="${head}: prompt ${i + 1}" ${rows[i] ? "checked" : ""} ${locked ? "disabled" : ""}></td></tr>`;
@@ -608,6 +590,12 @@ function renderPack(step, rec, locked) {
     return html + `</div>`;
   }
   return "";
+}
+
+// Annotated screenshots for a step, shipped inside the encrypted pack as data URIs.
+function renderVisuals(step) {
+  const shots = (S.pack && S.pack.visuals && S.pack.visuals[step.id]) || [];
+  return shots.map(v => `<figure class="shot"><img src="${esc(v.src)}" alt="${esc(v.alt || v.caption || "")}" loading="lazy"><figcaption>${esc(v.caption || "")}</figcaption></figure>`).join("");
 }
 
 /* ---------- Step ---------- */
@@ -631,6 +619,7 @@ function renderStep() {
   const locked = st !== "open";
   let html = `${eyebrow}<h1 class="step-title">${esc(step.title)}</h1><div class="prose">${step.body}</div>`;
   if (step.why) html += `<aside class="why"><span class="sub">why it matters</span>${esc(step.why)}</aside>`;
+  html += renderVisuals(step);
   html += renderPack(step, rec, locked);
 
   if (step.quiz) {

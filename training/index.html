@@ -147,8 +147,9 @@ ${(p.notes || []).map(t => `<li>${esc(t)}</li>`).join("")}
 <ol>
 <li>In the left menu under Manage, click <strong>Prompts</strong>, then <strong>Import</strong>.</li>
 <li>Stay on the <strong>Paste</strong> tab. Click <strong>Copy the list</strong> below, paste it into the box and click <strong>Preview prompts</strong>.</li>
-<li>Check that the preview shows <strong>${n} prompts</strong> and every row has a type and two tags. Then import.</li>
+<li>Check that the preview says <strong>${n} prompts ready to import</strong> and every row has a type and two tags. Then import.</li>
 </ol>
+${(p.newTags || []).length ? `<p>The preview will say it's creating ${p.newTags.length === 1 ? "a new tag" : "new tags"}: ${p.newTags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}. That's expected.</p>` : ""}
 <div class="stop">Stop and send ${TRAINER} a note if the count isn't ${n}, a column is blank, or Spyglasses says a prompt is very similar to one already there.</div>
 ${shots("import")}
 <div class="label">The list to paste (${n} prompts with their types and tags)</div>

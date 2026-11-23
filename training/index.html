@@ -130,7 +130,9 @@ function render() {
   // Spyglasses' Paste import reads spreadsheet cells: tab-separated columns under a header row.
   const paste = ["Prompt\tType\tTag 1\tTag 2"].concat(prompts.map(r => [r.text, r.type, ...(r.tags || [])].join("\t"))).join("\n");
   const rows = S.notes.rows || [];
-  const sections = [["start", "Before you start"], ["import", "Import the prompts"], ["check", "Check types and tags"], ["projects", "Add them to the projects"], ["send", `Send ${TRAINER} your notes`]];
+  // A pack with no projects (Laura builds them herself) skips the projects step.
+  const sections = [["start", "Before you start"], ["import", "Import the prompts"], ["check", "Check types and tags"], ["projects", "Add them to the projects"], ["send", `Send ${TRAINER} your notes`]]
+    .filter(([id]) => id !== "projects" || projects.length);
 
   $("app").innerHTML = `<div class="layout">
 <aside class="rail"><div class="task">${esc(p.title)}</div><div class="prop">Property: ${esc(p.property || "")}</div>
@@ -170,7 +172,7 @@ ${prompts.map((r, i) => `<tr class="${rows[i] ? "ticked" : ""}"><td class="n">${
 </tbody></table></div>
 </section>
 
-<section class="card" id="projects"><h2><span class="n">3</span>Add the new prompts to ${projects.length === 1 ? "the project" : "both projects"}</h2>
+${projects.length ? `<section class="card" id="projects"><h2><span class="n">3</span>Add the new prompts to ${projects.length === 1 ? "the project" : "both projects"}</h2>
 <ol>
 <li>Click <strong>Projects</strong> in the left menu and open <strong>${esc(projects[0] ? projects[0].name : "")}</strong>.</li>
 <li>Go to its <strong>Prompts</strong> tab and click <strong>Add prompts</strong>.</li>
@@ -179,13 +181,13 @@ ${projects.slice(1).map(pr => `<li>Do the same for <strong>${esc(pr.name)}</stro
 </ol>
 <p>Don't remove any prompt that's already in a project. When you're done, each project should show <strong>${esc(projects.map(pr => pr.after).filter((v, i, a) => a.indexOf(v) === i).join(" / "))} prompts</strong>${before !== "" ? ` (it shows ${esc(before)} now)` : ""}.</p>
 ${shots("projects")}
-</section>
+</section>` : ""}
 
-<section class="card" id="send"><h2><span class="n">4</span>Send ${TRAINER} your notes</h2>
+<section class="card" id="send"><h2><span class="n">${projects.length ? 4 : 3}</span>Send ${TRAINER} your notes</h2>
 <p>Fill these in, then copy your notes and paste them into a message to ${TRAINER}.</p>
 <div class="field"><label for="f-name">Your name</label><input type="text" id="f-name" value="${esc(S.notes.name)}" autocomplete="name"></div>
 <div class="field"><label for="f-preview">Preview count before you imported</label><input type="text" id="f-preview" value="${esc(S.notes.preview)}" placeholder="${n}"></div>
-<div class="field"><label for="f-projects">Prompts in each project now</label><input type="text" id="f-projects" value="${esc(S.notes.projects)}" placeholder="${esc(projects.map(pr => pr.name + ": " + pr.after).join(", "))}"></div>
+${projects.length ? `<div class="field"><label for="f-projects">Prompts in each project now</label><input type="text" id="f-projects" value="${esc(S.notes.projects)}" placeholder="${esc(projects.map(pr => pr.name + ": " + pr.after).join(", "))}"></div>` : ""}
 <div class="field"><label for="f-issues">Anything that looked off (or “nothing”)</label><textarea id="f-issues">${esc(S.notes.issues)}</textarea></div>
 <div class="row"><button class="btn" type="button" id="copyNotes">Copy my notes</button><button class="btn ghost" type="button" id="downloadNotes">Download them</button><span class="note" id="notesNote"></span></div>
 </section>
@@ -197,7 +199,7 @@ ${shots("projects")}
     $("rowCount").textContent = `${r.filter(Boolean).length} of ${n} checked`;
   }));
   [["f-name", "name"], ["f-preview", "preview"], ["f-projects", "projects"], ["f-issues", "issues"]].forEach(([id, key]) =>
-    $(id).addEventListener("input", e => { S.notes[key] = e.target.value; saveNotes(); }));
+    $(id) && $(id).addEventListener("input", e => { S.notes[key] = e.target.value; saveNotes(); }));
   $("copyPaste").addEventListener("click", () => copyText($("pasteText").value, $("copyPasteNote"), $("pasteText")));
   $("copyNotes").addEventListener("click", () => copyText(buildNotes(), $("notesNote")));
   $("downloadNotes").addEventListener("click", downloadNotes);
@@ -210,7 +212,7 @@ function buildNotes() {
   const p = S.pack; const prompts = p.prompts || []; const rows = S.notes.rows || [];
   const left = prompts.map((r, i) => rows[i] ? null : `#${i + 1} ${r.text}`).filter(Boolean);
   const L = [`Spyglasses steps: ${p.title}`, `Property: ${p.property || ""}`, `From: ${S.notes.name || "(no name)"}`, `Sent: ${new Date().toLocaleString()}`, ``,
-    `Preview count: ${S.notes.preview || "(blank)"}`, `Prompts in each project now: ${S.notes.projects || "(blank)"}`,
+    `Preview count: ${S.notes.preview || "(blank)"}`, ...((p.projects || []).length ? [`Prompts in each project now: ${S.notes.projects || "(blank)"}`] : []),
     `Sheet checked: ${prompts.length - left.length} of ${prompts.length}${left.length ? ". Not checked: " + left.join(" | ") : ""}`,
     `Anything off: ${S.notes.issues || "(blank)"}`, ``, `---- data for ${TRAINER} (leave as is) ----`,
     JSON.stringify({ assignment: PACK_ID, packVersion: p.updatedAt || null, sentAt: new Date().toISOString(), ...S.notes })];

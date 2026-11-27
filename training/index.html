@@ -124,7 +124,35 @@ function chip() { $("chip").textContent = S.storageOk ? "Your ticks and notes sa
 const shots = key => ((S.pack.visuals || {})[key] || []).map(v =>
   `<figure class="shot"><img src="${esc(v.src)}" alt="${esc(v.caption || "")}" loading="lazy"><figcaption>${esc(v.caption || "")}</figcaption></figure>`).join("");
 
+// A pack with kind "steps" is plain how-to steps (links, sections, a notes box), not a Spyglasses import.
+function renderSteps() {
+  const p = S.pack; const secs = p.sections || [];
+  const list = sec => sec.items && sec.items.length ? `<${sec.ordered ? "ol" : "ul"}>${sec.items.map(t => `<li>${esc(t)}</li>`).join("")}</${sec.ordered ? "ol" : "ul"}>` : "";
+  $("app").innerHTML = `<div class="layout">
+<aside class="rail"><div class="task">${esc(p.title)}</div><div class="prop">${esc(p.subtitle || "")}</div>
+<nav aria-label="Steps"><a href="#start"><span class="n"></span>Before you start</a>${secs.map((sec, i) => `<a href="#s${i + 1}"><span class="n">${i + 1}</span>${esc(sec.title)}</a>`).join("")}<a href="#send"><span class="n">${secs.length + 1}</span>Send ${TRAINER} your notes</a></nav></aside>
+<div class="main">
+<section class="card" id="start"><h1>${esc(p.title)}</h1>${p.intro ? `<p class="lede">${esc(p.intro)}</p>` : ""}
+${(p.links || []).length ? `<ul>${p.links.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>${l.note ? ` <span class="note">${esc(l.note)}</span>` : ""}</li>`).join("")}</ul>` : ""}
+${(p.notes || []).length ? `<ul>${p.notes.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}</section>
+${secs.map((sec, i) => `<section class="card" id="s${i + 1}"><h2><span class="n">${i + 1}</span>${esc(sec.title)}</h2>
+${(sec.paras || []).map(t => `<p>${esc(t)}</p>`).join("")}${list(sec)}${sec.stop ? `<div class="stop">${esc(sec.stop)}</div>` : ""}</section>`).join("")}
+<section class="card" id="send"><h2><span class="n">${secs.length + 1}</span>Send ${TRAINER} your notes</h2>
+<p>Fill these in when you finish, or at the end of each day, then copy your notes into a message to ${TRAINER}.</p>
+<div class="field"><label for="f-name">Your name</label><input type="text" id="f-name" value="${esc(S.notes.name)}" autocomplete="name"></div>
+<div class="field"><label for="f-projects">Rows finished so far</label><input type="text" id="f-projects" value="${esc(S.notes.projects)}" placeholder="${esc(p.progressHint || "")}"></div>
+<div class="field"><label for="f-issues">Anything that looked off (or “nothing”)</label><textarea id="f-issues">${esc(S.notes.issues)}</textarea></div>
+<div class="row"><button class="btn" type="button" id="copyNotes">Copy my notes</button><button class="btn ghost" type="button" id="downloadNotes">Download them</button><span class="note" id="notesNote"></span></div>
+</section></div></div>`;
+  [["f-name", "name"], ["f-projects", "projects"], ["f-issues", "issues"]].forEach(([id, key]) =>
+    $(id).addEventListener("input", e => { S.notes[key] = e.target.value; saveNotes(); }));
+  $("copyNotes").addEventListener("click", () => copyText(buildNotes(), $("notesNote")));
+  $("downloadNotes").addEventListener("click", downloadNotes);
+  chip();
+}
+
 function render() {
+  if (S.pack.kind === "steps") return renderSteps();
   const p = S.pack; const prompts = p.prompts || []; const projects = p.projects || [];
   const n = prompts.length; const before = projects[0] ? projects[0].before : "";
   // Spyglasses' Paste import reads spreadsheet cells: tab-separated columns under a header row.
@@ -211,6 +239,9 @@ ${projects.length ? `<div class="field"><label for="f-projects">Prompts in each 
 /* ---------- Notes for Laura ---------- */
 // Readable summary first, then one data line Laura can paste back to Claude to check against Spyglasses.
 function buildNotes() {
+  if (S.pack.kind === "steps") return [`Steps: ${S.pack.title}`, `From: ${S.notes.name || "(no name)"}`, `Sent: ${new Date().toLocaleString()}`, ``,
+    `Rows finished: ${S.notes.projects || "(blank)"}`, `Anything off: ${S.notes.issues || "(blank)"}`, ``, `---- data for ${TRAINER} (leave as is) ----`,
+    JSON.stringify({ assignment: PACK_ID, packVersion: S.pack.updatedAt || null, sentAt: new Date().toISOString(), name: S.notes.name, rowsDone: S.notes.projects, issues: S.notes.issues })].join("\n");
   const p = S.pack; const prompts = p.prompts || []; const rows = S.notes.rows || [];
   const left = prompts.map((r, i) => rows[i] ? null : `#${i + 1} ${r.text}`).filter(Boolean);
   const L = [`Spyglasses steps: ${p.title}`, `Property: ${p.property || ""}`, `From: ${S.notes.name || "(no name)"}`, `Sent: ${new Date().toLocaleString()}`, ``,
@@ -246,6 +277,7 @@ async function decryptPack(enc, pw) {
 function start(pack, pw) {
   try { localStorage.setItem(KEY_STORE, pw); } catch {}
   S.pack = pack; document.title = pack.title || document.title;
+  if (pack.brand) document.querySelector(".brand").textContent = pack.brand;
   loadNotes(); render();
 }
 function message(title, text) { $("chip").textContent = "Not loaded"; $("app").innerHTML = `<div class="card lock"><h1>${esc(title)}</h1><p>${esc(text)}</p></div>`; }

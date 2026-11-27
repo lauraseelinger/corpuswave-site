@@ -130,9 +130,11 @@ function render() {
   // Spyglasses' Paste import reads spreadsheet cells: tab-separated columns under a header row.
   const paste = ["Prompt\tType\tTag 1\tTag 2"].concat(prompts.map(r => [r.text, r.type, ...(r.tags || [])].join("\t"))).join("\n");
   const rows = S.notes.rows || [];
-  // A pack with no projects (Laura builds them herself) skips the projects step.
+  // A pack with no projects (Laura builds them herself) skips the projects step;
+  // skipImport (Laura imported the prompts herself) skips the import step.
   const sections = [["start", "Before you start"], ["import", "Import the prompts"], ["check", "Check types and tags"], ["projects", "Add them to the projects"], ["send", `Send ${TRAINER} your notes`]]
-    .filter(([id]) => id !== "projects" || projects.length);
+    .filter(([id]) => (id !== "projects" || projects.length) && (id !== "import" || !p.skipImport));
+  const num = id => sections.findIndex(([s]) => s === id);
 
   $("app").innerHTML = `<div class="layout">
 <aside class="rail"><div class="task">${esc(p.title)}</div><div class="prop">Property: ${esc(p.property || "")}</div>
@@ -145,7 +147,7 @@ function render() {
 ${(p.notes || []).map(t => `<li>${esc(t)}</li>`).join("")}
 </ul>${shots("switcher")}</section>
 
-<section class="card" id="import"><h2><span class="n">1</span>Import the prompts</h2>
+${p.skipImport ? "" : `<section class="card" id="import"><h2><span class="n">${num("import")}</span>Import the prompts</h2>
 <ol>
 <li>In the left menu under Manage, click <strong>Prompts</strong>, then <strong>Import</strong>.</li>
 <li>Stay on the <strong>Paste</strong> tab. Click <strong>Copy the list</strong> below, paste it into the box and click <strong>Preview prompts</strong>.</li>
@@ -157,9 +159,9 @@ ${shots("import")}
 <div class="label">The list to paste (${n} prompts with their types and tags)</div>
 <textarea class="paste" id="pasteText" readonly>${esc(paste)}</textarea>
 <div class="row"><button class="btn" type="button" id="copyPaste">Copy the list</button><span class="note" id="copyPasteNote"></span></div>
-</section>
+</section>`}
 
-<section class="card" id="check"><h2><span class="n">2</span>Check each prompt's type and tags</h2>
+<section class="card" id="check"><h2><span class="n">${num("check")}</span>Check each prompt's type and tags</h2>
 <ol>
 <li>On the Prompts page, find each prompt from the sheet below with the search box.</li>
 <li>Its type shows under the prompt text. Its tags are in the Tags column. Both should match the sheet.</li>
@@ -172,7 +174,7 @@ ${prompts.map((r, i) => `<tr class="${rows[i] ? "ticked" : ""}"><td class="n">${
 </tbody></table></div>
 </section>
 
-${projects.length ? `<section class="card" id="projects"><h2><span class="n">3</span>Add the new prompts to ${projects.length === 1 ? "the project" : "both projects"}</h2>
+${projects.length ? `<section class="card" id="projects"><h2><span class="n">${num("projects")}</span>Add the new prompts to ${projects.length === 1 ? "the project" : "both projects"}</h2>
 <ol>
 <li>Click <strong>Projects</strong> in the left menu and open <strong>${esc(projects[0] ? projects[0].name : "")}</strong>.</li>
 <li>Go to its <strong>Prompts</strong> tab and click <strong>Add prompts</strong>.</li>
@@ -183,10 +185,10 @@ ${projects.slice(1).map(pr => `<li>Do the same for <strong>${esc(pr.name)}</stro
 ${shots("projects")}
 </section>` : ""}
 
-<section class="card" id="send"><h2><span class="n">${projects.length ? 4 : 3}</span>Send ${TRAINER} your notes</h2>
+<section class="card" id="send"><h2><span class="n">${num("send")}</span>Send ${TRAINER} your notes</h2>
 <p>Fill these in, then copy your notes and paste them into a message to ${TRAINER}.</p>
 <div class="field"><label for="f-name">Your name</label><input type="text" id="f-name" value="${esc(S.notes.name)}" autocomplete="name"></div>
-<div class="field"><label for="f-preview">Preview count before you imported</label><input type="text" id="f-preview" value="${esc(S.notes.preview)}" placeholder="${n}"></div>
+${p.skipImport ? "" : `<div class="field"><label for="f-preview">Preview count before you imported</label><input type="text" id="f-preview" value="${esc(S.notes.preview)}" placeholder="${n}"></div>`}
 ${projects.length ? `<div class="field"><label for="f-projects">Prompts in each project now</label><input type="text" id="f-projects" value="${esc(S.notes.projects)}" placeholder="${esc(projects.map(pr => pr.name + ": " + pr.after).join(", "))}"></div>` : ""}
 <div class="field"><label for="f-issues">Anything that looked off (or “nothing”)</label><textarea id="f-issues">${esc(S.notes.issues)}</textarea></div>
 <div class="row"><button class="btn" type="button" id="copyNotes">Copy my notes</button><button class="btn ghost" type="button" id="downloadNotes">Download them</button><span class="note" id="notesNote"></span></div>
@@ -200,7 +202,7 @@ ${projects.length ? `<div class="field"><label for="f-projects">Prompts in each 
   }));
   [["f-name", "name"], ["f-preview", "preview"], ["f-projects", "projects"], ["f-issues", "issues"]].forEach(([id, key]) =>
     $(id) && $(id).addEventListener("input", e => { S.notes[key] = e.target.value; saveNotes(); }));
-  $("copyPaste").addEventListener("click", () => copyText($("pasteText").value, $("copyPasteNote"), $("pasteText")));
+  $("copyPaste") && $("copyPaste").addEventListener("click", () => copyText($("pasteText").value, $("copyPasteNote"), $("pasteText")));
   $("copyNotes").addEventListener("click", () => copyText(buildNotes(), $("notesNote")));
   $("downloadNotes").addEventListener("click", downloadNotes);
   chip();
@@ -212,7 +214,7 @@ function buildNotes() {
   const p = S.pack; const prompts = p.prompts || []; const rows = S.notes.rows || [];
   const left = prompts.map((r, i) => rows[i] ? null : `#${i + 1} ${r.text}`).filter(Boolean);
   const L = [`Spyglasses steps: ${p.title}`, `Property: ${p.property || ""}`, `From: ${S.notes.name || "(no name)"}`, `Sent: ${new Date().toLocaleString()}`, ``,
-    `Preview count: ${S.notes.preview || "(blank)"}`, ...((p.projects || []).length ? [`Prompts in each project now: ${S.notes.projects || "(blank)"}`] : []),
+    ...(p.skipImport ? [] : [`Preview count: ${S.notes.preview || "(blank)"}`]), ...((p.projects || []).length ? [`Prompts in each project now: ${S.notes.projects || "(blank)"}`] : []),
     `Sheet checked: ${prompts.length - left.length} of ${prompts.length}${left.length ? ". Not checked: " + left.join(" | ") : ""}`,
     `Anything off: ${S.notes.issues || "(blank)"}`, ``, `---- data for ${TRAINER} (leave as is) ----`,
     JSON.stringify({ assignment: PACK_ID, packVersion: p.updatedAt || null, sentAt: new Date().toISOString(), ...S.notes })];
